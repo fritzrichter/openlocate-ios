@@ -33,12 +33,12 @@ OpenLocate is supported by mobile app developers, non-profit trade groups, acade
 
 ## Installation
 
-1. Cocoapods
+Cocoapods
 
 If you use cocoapods, add the following line in your podfile and run `pod install`
 
 ```ruby
-pod 'OpenLocate'
+pod 'OpenLocate', :git => 'https://github.com/OpenLocate/openlocate-ios', :branch => 'master'
 ```
 
 ## Usage

@@ -22,8 +22,6 @@
 //  SOFTWARE.
 //
 
-import Foundation
-
 public typealias Headers = [String: String]
 
 // Configuration
@@ -32,14 +30,14 @@ public struct Configuration {
 
     let url: URL
     let headers: Headers?
-    let isNetworkInfoLogging: Bool
+    let logConfiguration: LogConfiguration
 
     public init(url: URL,
                 headers: Headers? = nil,
-                isNetworkInfoLogging: Bool = true) {
+                logConfiguration: LogConfiguration = .default) {
 
         self.url = url
         self.headers = headers
-        self.isNetworkInfoLogging = isNetworkInfoLogging
+        self.logConfiguration = logConfiguration
     }
 }

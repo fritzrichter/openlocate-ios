@@ -73,7 +73,7 @@ extension OpenLocate {
             advertisingInfo: advertisingInfo,
             locationManager: locationManager,
             transmissionInterval: Constants.defaultTransmissionInterval,
-            logNetworkInfo: configuration.isNetworkInfoLogging
+            logConfiguration: configuration.logConfiguration
         )
 
         if let locationService = self.locationService, locationService.isStarted {

@@ -39,6 +39,7 @@
 		48E45DF11F094506006EAF6F /* LocationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E45DF01F094506006EAF6F /* LocationTests.swift */; };
 		48F0DCC71F3B3A89004C4943 /* HttpResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48F0DCC61F3B3A89004C4943 /* HttpResponseTests.swift */; };
 		DE2D17EC1F7838140074B3E4 /* LocationManagerType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2D17EB1F7838140074B3E4 /* LocationManagerType.swift */; };
+		DED3CECF1F7EE18F002DDE5D /* LogConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED3CECE1F7EE18F002DDE5D /* LogConfiguration.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -90,6 +91,7 @@
 		48E45DF01F094506006EAF6F /* LocationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationTests.swift; sourceTree = "<group>"; };
 		48F0DCC61F3B3A89004C4943 /* HttpResponseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HttpResponseTests.swift; sourceTree = "<group>"; };
 		DE2D17EB1F7838140074B3E4 /* LocationManagerType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LocationManagerType.swift; path = Source/LocationManagerType.swift; sourceTree = "<group>"; };
+		DED3CECE1F7EE18F002DDE5D /* LogConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LogConfiguration.swift; path = Source/LogConfiguration.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +136,7 @@
 			isa = PBXGroup;
 			children = (
 				485A63F01F445E140005F86D /* Configuration.swift */,
+				DED3CECE1F7EE18F002DDE5D /* LogConfiguration.swift */,
 			);
 			name = Config;
 			sourceTree = "<group>";
@@ -406,6 +409,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DED3CECF1F7EE18F002DDE5D /* LogConfiguration.swift in Sources */,
 				4897016F1F05183100D8C27C /* HttpClient.swift in Sources */,
 				4832EF471F14852F004B3EC2 /* HttpRequest.swift in Sources */,
 				111E607F1F758494004B2D20 /* NetworkInfo.swift in Sources */,

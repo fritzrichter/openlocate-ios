@@ -120,7 +120,7 @@ The following fields are collected by the SDK to be sent to a private or public 
 By default all these fields are collected. Naturally you can choose what fields you'd like to collect. You just need to configure configuration in such way
 
 ```swift
-    let logConfiguration = LogConfiguration(isNetworkInfoLogging: true, isDeviceCourseLogging: false)
+    let logConfiguration = LogConfiguration(shouldLogNetworkInfo: true, shouldLogDeviceCourse: false)
     let configuration = Configuration(url: url, headers: headers, logConfiguration: logConfiguration)
 ```
 

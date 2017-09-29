@@ -136,9 +136,14 @@ extension OpenLocate {
             return
         }
 
+        let logConfiguration = configuration?.logConfiguration ?? .default
+        let networkInfo = logConfiguration.shouldLogNetworkInfo ? NetworkInfo.currentNetworkInfo() : NetworkInfo()
+        let course = logConfiguration.shouldLogDeviceCourse ? location.course : nil
+
         let openlocateLocation = OpenLocateLocation(location: location,
                                                     advertisingInfo: advertisingInfo,
-                                                    logConfiguration: configuration?.logConfiguration ?? .default)
+                                                    networkInfo: networkInfo,
+                                                    course: course)
         completion(openlocateLocation, nil)
     }
 }

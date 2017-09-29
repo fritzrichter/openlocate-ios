@@ -46,6 +46,7 @@ final class OpenLocateLocationTests: BaseTestCase {
         let location = OpenLocateLocation(location: coreLocation,
                                           advertisingInfo: adInfo,
                                           networkInfo: networkInfo,
+                                          course: coreLocation.course,
                                           context: .visitExit)
         let jsonDict = location.json as? JsonDictionary
         let json = jsonDict!
@@ -60,6 +61,7 @@ final class OpenLocateLocationTests: BaseTestCase {
         XCTAssertEqual((json["id_type"] as? String)!, "idfa")
         XCTAssertEqual((json["wifi_bssid"] as? String)!, "bssid_goes_here")
         XCTAssertEqual((json["wifi_ssid"] as? String)!, "ssid_goes_here")
+        XCTAssertEqual((json["course"] as? Double)!, Double(exactly: 180.0))
         XCTAssertEqual((json["location_context"] as? String)!, "visit_exit")
     }
 }

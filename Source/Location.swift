@@ -85,15 +85,15 @@ public struct OpenLocateLocation: OpenLocateLocationType {
 
     init(location: CLLocation,
          advertisingInfo: AdvertisingInfo,
-         logConfiguration: LogConfiguration,
+         networkInfo: NetworkInfo,
+         course: Double?,
          context: Context = .unknown) {
 
         self.location = location
         self.advertisingInfo = advertisingInfo
+        self.networkInfo = networkInfo
+        self.course = course
         self.context = context
-
-        self.networkInfo = logConfiguration.isNetworkInfoLogging ? NetworkInfo.currentNetworkInfo() : NetworkInfo()
-        self.course = logConfiguration.isDeviceCourseLogging ? location.course : nil
     }
 }
 
@@ -125,6 +125,8 @@ extension OpenLocateLocation {
             altitude: coding.altitude,
             horizontalAccuracy: coding.horizontalAccuracy,
             verticalAccuracy: coding.verticalAccuracy,
+            course: coding.course ?? -1,
+            speed: -1, // Will be changed in next PR.
             timestamp: Date(timeIntervalSince1970: coding.timeStamp)
         )
 
@@ -173,7 +175,7 @@ extension OpenLocateLocation {
             bssid = location.networkInfo.bssid
             ssid = location.networkInfo.ssid
             context = location.context.rawValue
-            course = location.course
+            course = location.location.course
         }
 
         required init?(coder aDecoder: NSCoder) {

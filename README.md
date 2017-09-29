@@ -115,6 +115,14 @@ The following fields are collected by the SDK to be sent to a private or public 
 5. `id_type` - 'idfa' for identifying Apple device advertising type
 6. `ad_id` - Advertising identifier
 7. `ad_opt_out` - Limited ad tracking enabled flag
+8. `course` - The direction in which the device is traveling
+
+By default all these fields are collected. Naturally you can choose what fields you'd like to collect. You just need to configure configuration in such way
+
+```swift
+    let logConfiguration = LogConfiguration(isNetworkInfoLogging: true, isDeviceCourseLogging: false)
+    let configuration = Configuration(url: url, headers: headers, logConfiguration: logConfiguration)
+```
 
 ## Communication
 

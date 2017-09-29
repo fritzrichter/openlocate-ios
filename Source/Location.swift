@@ -85,15 +85,15 @@ public struct OpenLocateLocation: OpenLocateLocationType {
 
     init(location: CLLocation,
          advertisingInfo: AdvertisingInfo,
-         networkInfo: NetworkInfo,
-         course: Double?,
+         logConfiguration: LogConfiguration,
          context: Context = .unknown) {
 
         self.location = location
         self.advertisingInfo = advertisingInfo
-        self.networkInfo = networkInfo
-        self.course = course
         self.context = context
+
+        self.networkInfo = logConfiguration.isNetworkInfoLogging ? NetworkInfo.currentNetworkInfo() : NetworkInfo()
+        self.course = logConfiguration.isDeviceCourseLogging ? location.course : nil
     }
 }
 

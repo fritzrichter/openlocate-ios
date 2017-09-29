@@ -83,15 +83,10 @@ final class LocationService: LocationServiceType {
 
         locationManager.subscribe { locations in
 
-            let networkInfo
-                = self.logConfiguration.isNetworkInfoLogging ? NetworkInfo.currentNetworkInfo() : NetworkInfo()
-
             let openLocateLocations: [OpenLocateLocation] = locations.map {
-                let course: Double? = self.logConfiguration.isDeviceCourseLogging ? $0.location.course : nil
                 return OpenLocateLocation(location: $0.location,
                                           advertisingInfo: self.advertisingInfo,
-                                          networkInfo: networkInfo,
-                                          course: course,
+                                          logConfiguration: self.logConfiguration,
                                           context: $0.context)
             }
 

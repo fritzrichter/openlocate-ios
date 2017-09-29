@@ -22,9 +22,14 @@
 //  SOFTWARE.
 //
 
+/// Configuration which describes all data which is sending from the device
 public struct LogConfiguration {
+    /// Determines whether network information is sending or not. Default value is true.
     public let isNetworkInfoLogging: Bool
+
+    /// Determines whether device course (bearing) is sending or not. Default value is true.
     public let isDeviceCourseLogging: Bool
 
+    /// Default configuration. All parameters are set to true.
     public static let `default` = LogConfiguration(isNetworkInfoLogging: true, isDeviceCourseLogging: true)
 }

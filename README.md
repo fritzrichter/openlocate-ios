@@ -118,7 +118,8 @@ The following fields are collected by the SDK to be sent to a private or public 
 8. `course` - The direction in which the device is traveling
 9. `speed` - The instantaneous speed of the device, measured in meters per second
 10. `is_charging` - Indicates if device is charging
-11. `device_model` - Model of the user's phone
+11. `device_model` - Model of the user's device
+12. `os_version` - Version of the using OS on the device
 
 By default all these fields are collected. Naturally you can choose what fields you'd like to collect. You just need to configure configuration in such way.
 For example, you want to send all fields except device course and charging. Than you should do so:

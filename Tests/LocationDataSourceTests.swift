@@ -46,7 +46,7 @@ class LocationDataSourceTests: BaseTestCase {
             .build()
 
         let networkInfo = NetworkInfo(bssid: "bssid_goes_here", ssid: "ssid_goes_here")
-        let deviceInfo = DeviceInfo(isCharging: false, deviceModel: "iPhone9,4")
+        let deviceInfo = DeviceInfo(isCharging: false, deviceModel: "iPhone 7 Plus", osVersion: "iOS 11.0.1")
 
         let info = OpenLocateInfo.Builder(logConfiguration: .default)
             .set(location: coreLocation)
@@ -164,7 +164,7 @@ class LocationListDataSource: BaseTestCase {
             .build()
 
         let networkInfo = NetworkInfo(bssid: "bssid_goes_here", ssid: "ssid_goes_here")
-        let deviceInfo = DeviceInfo(isCharging: false, deviceModel: "iPhone9,4")
+        let deviceInfo = DeviceInfo(isCharging: false, deviceModel: "iPhone 7 Plus", osVersion: "iOS 11.0.1")
 
         let info = OpenLocateInfo.Builder(logConfiguration: .default)
             .set(location: coreLocation)

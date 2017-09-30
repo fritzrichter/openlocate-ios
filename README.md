@@ -117,12 +117,16 @@ The following fields are collected by the SDK to be sent to a private or public 
 7. `ad_opt_out` - Limited ad tracking enabled flag
 8. `course` - The direction in which the device is traveling
 9. `speed` - The instantaneous speed of the device, measured in meters per second
+10. `is_charging` - Indicates if device is charging.
 
 By default all these fields are collected. Naturally you can choose what fields you'd like to collect. You just need to configure configuration in such way.
-For example, you want to send information about network and device speed, but don't want device course. Than you should do so:
+For example, you want to send information about network and device speed, but don't want device course and charging. Than you should do so:
 
 ```swift
-    let logConfiguration = LogConfiguration(shouldLogNetworkInfo: true, shouldLogDeviceCourse: false, shouldLogDeviceSpeed: true)
+    let logConfiguration = LogConfiguration(shouldLogNetworkInfo: true,
+                                            shouldLogDeviceCourse: false,
+                                            shouldLogDeviceSpeed: true,
+                                            shouldLogDeviceCharging: false)
     let configuration = Configuration(url: url, headers: headers, logConfiguration: logConfiguration)
 ```
 

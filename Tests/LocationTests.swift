@@ -41,10 +41,12 @@ final class OpenLocateLocationTests: BaseTestCase {
 
         let adInfo = AdvertisingInfo.Builder().set(advertisingId: "2345").set(isLimitedAdTrackingEnabled: true).build()
         let networkInfo = NetworkInfo(bssid: "bssid_goes_here", ssid: "ssid_goes_here")
+        let deviceInfo = DeviceInfo(isCharging: false)
 
         let info = OpenLocateInfo.Builder(logConfiguration: .default)
             .set(location: coreLocation)
             .set(network: networkInfo)
+            .set(deviceInfo: deviceInfo)
             .build()
 
         //When
@@ -67,6 +69,7 @@ final class OpenLocateLocationTests: BaseTestCase {
         XCTAssertEqual((json["wifi_ssid"] as? String)!, "ssid_goes_here")
         XCTAssertEqual((json["course"] as? Double)!, Double(exactly: 180.0))
         XCTAssertEqual((json["speed"] as? Double)!, Double(exactly: 20.0))
+        XCTAssertEqual((json["is_charging"] as? Bool)!, false)
         XCTAssertEqual((json["location_context"] as? String)!, "visit_exit")
     }
 }

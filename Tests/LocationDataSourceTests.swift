@@ -46,10 +46,12 @@ class LocationDataSourceTests: BaseTestCase {
             .build()
 
         let networkInfo = NetworkInfo(bssid: "bssid_goes_here", ssid: "ssid_goes_here")
+        let deviceInfo = DeviceInfo(isCharging: false)
 
         let info = OpenLocateInfo.Builder(logConfiguration: .default)
             .set(location: coreLocation)
             .set(network: networkInfo)
+            .set(deviceInfo: deviceInfo)
             .build()
 
         return OpenLocateLocation(
@@ -162,10 +164,12 @@ class LocationListDataSource: BaseTestCase {
             .build()
 
         let networkInfo = NetworkInfo(bssid: "bssid_goes_here", ssid: "ssid_goes_here")
+        let deviceInfo = DeviceInfo(isCharging: false)
 
         let info = OpenLocateInfo.Builder(logConfiguration: .default)
             .set(location: coreLocation)
             .set(network: networkInfo)
+            .set(deviceInfo: deviceInfo)
             .build()
 
         return OpenLocateLocation(
@@ -250,6 +254,7 @@ class LocationListDataSource: BaseTestCase {
         XCTAssertEqual(firstLocation.location.coordinate.longitude, testLocation.location.coordinate.longitude)
         XCTAssertEqual(firstLocation.deviceLocationInfo.deviceCourse, testLocation.location.course)
         XCTAssertEqual(firstLocation.deviceLocationInfo.deviceSpeed, testLocation.location.speed)
+        XCTAssertEqual(firstLocation.deviceInfo.isCharging, testLocation.deviceInfo.isCharging)
         XCTAssertEqual(firstLocation.location.timestamp.timeIntervalSince1970,
                        testLocation.location.timestamp.timeIntervalSince1970, accuracy: 0.1)
     }

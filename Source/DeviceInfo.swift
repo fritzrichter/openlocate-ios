@@ -12,20 +12,28 @@ import UIKit.UIDevice
 struct DeviceInfo {
     let isCharging: Bool?
     let deviceModel: String?
+    let osVersion: String?
 
     static func currentDeviceInfo(withLogConfiguration configuration: LogConfiguration) -> DeviceInfo {
         let currentDevice = UIDevice.current
 
         let isCharging = configuration.shouldLogDeviceCharging ? currentDevice.isCharging : nil
         let deviceModel = configuration.shouldLogDeviceModel ? currentDevice.modelName : nil
+        let osVersion = configuration.shouldLogDeviceOsVersion ? currentDevice.osVersion : nil
 
-        return DeviceInfo(isCharging: isCharging, deviceModel: deviceModel)
+        return DeviceInfo(isCharging: isCharging, deviceModel: deviceModel, osVersion: osVersion)
     }
 }
 
 extension UIDevice {
     var isCharging: Bool {
         return batteryState == .charging
+    }
+}
+
+extension UIDevice {
+    var osVersion: String {
+        return "\(systemName) \(systemVersion)"
     }
 }
 

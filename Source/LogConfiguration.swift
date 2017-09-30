@@ -36,8 +36,11 @@ public struct LogConfiguration {
     /// Determines whether device charging status should be sent ot not. Default value is true.
     public var shouldLogDeviceCharging: Bool
 
-    /// Determines whether device model should be sent. Default value is true
+    /// Determines whether device model should be sent. Default value is true.
     public var shouldLogDeviceModel: Bool
+
+    /// Determines whether device's os version is sent. Default value is true.
+    public var shouldLogDeviceOsVersion: Bool
 
     /// Default configuration. All parameters are set to true.
     public static let `default` = LogConfiguration(
@@ -45,6 +48,7 @@ public struct LogConfiguration {
         shouldLogDeviceCourse: true,
         shouldLogDeviceSpeed: true,
         shouldLogDeviceCharging: true,
-        shouldLogDeviceModel: true
+        shouldLogDeviceModel: true,
+        shouldLogDeviceOsVersion: true
     )
 }

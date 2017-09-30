@@ -81,15 +81,16 @@ final class LocationService: LocationServiceType {
     func start() {
         debugPrint("Location service started for url : \(url)")
 
-        let networkInfo = logConfiguration.shouldLogNetworkInfo ? NetworkInfo.currentNetworkInfo() : NetworkInfo()
-
         locationManager.subscribe { locations in
 
             let openLocateLocations: [OpenLocateLocation] = locations.map {
+                let info = OpenLocateInfo.Builder(logConfiguration: self.logConfiguration)
+                    .set(location: $0.location)
+                    .set(network: NetworkInfo.currentNetworkInfo())
+                    .build()
                 return OpenLocateLocation(location: $0.location,
                                           advertisingInfo: self.advertisingInfo,
-                                          networkInfo: networkInfo,
-                                          course: $0.location.course,
+                                          info: info,
                                           context: $0.context)
             }
 

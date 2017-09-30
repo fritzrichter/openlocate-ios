@@ -61,6 +61,7 @@ public struct OpenLocateLocation: OpenLocateLocationType {
         static let wifissid = "wifi_ssid"
         static let locationContext = "location_context"
         static let course = "course"
+        static let speed = "speed"
     }
 
     enum Context: String {
@@ -76,7 +77,7 @@ public struct OpenLocateLocation: OpenLocateLocationType {
     let location: CLLocation
     let advertisingInfo: AdvertisingInfo
     let networkInfo: NetworkInfo
-    let course: Double?
+    let deviceLocationInfo: DeviceLocationInfo
     let context: Context
 
     var debugDescription: String {
@@ -85,14 +86,13 @@ public struct OpenLocateLocation: OpenLocateLocationType {
 
     init(location: CLLocation,
          advertisingInfo: AdvertisingInfo,
-         networkInfo: NetworkInfo,
-         course: Double?,
+         info: OpenLocateInfo,
          context: Context = .unknown) {
 
         self.location = location
         self.advertisingInfo = advertisingInfo
-        self.networkInfo = networkInfo
-        self.course = course
+        self.networkInfo = info.networkInfo
+        self.deviceLocationInfo = info.deviceLocationInfo
         self.context = context
     }
 }
@@ -109,7 +109,8 @@ extension OpenLocateLocation {
             Keys.horizontalAccuracy: location.horizontalAccuracy,
             Keys.wifiBssid: networkInfo.bssid ?? NSNull(),
             Keys.wifissid: networkInfo.ssid ?? NSNull(),
-            Keys.course: course ?? NSNull(),
+            Keys.course: deviceLocationInfo.deviceCourse ?? NSNull(),
+            Keys.speed: deviceLocationInfo.deviceSpeed ?? NSNull(),
             Keys.locationContext: context.rawValue
         ]
     }
@@ -126,7 +127,7 @@ extension OpenLocateLocation {
             horizontalAccuracy: coding.horizontalAccuracy,
             verticalAccuracy: coding.verticalAccuracy,
             course: coding.course ?? -1,
-            speed: -1, // Will be changed in next PR.
+            speed: coding.speed ?? -1,
             timestamp: Date(timeIntervalSince1970: coding.timeStamp)
         )
 
@@ -136,7 +137,7 @@ extension OpenLocateLocation {
             .build()
 
         self.networkInfo = NetworkInfo(bssid: coding.bssid, ssid: coding.ssid)
-        self.course = coding.course
+        self.deviceLocationInfo = DeviceLocationInfo(deviceCourse: coding.course, deviceSpeed: coding.speed)
 
         if let contextString = coding.context, let context = Context(rawValue: contextString) {
             self.context = context
@@ -162,6 +163,7 @@ extension OpenLocateLocation {
         let ssid: String?
         let context: String?
         let course: Double?
+        let speed: Double?
 
         init(_ location: OpenLocateLocation) {
             latitude = location.location.coordinate.latitude
@@ -175,7 +177,8 @@ extension OpenLocateLocation {
             bssid = location.networkInfo.bssid
             ssid = location.networkInfo.ssid
             context = location.context.rawValue
-            course = location.location.course
+            course = location.deviceLocationInfo.deviceCourse
+            speed = location.deviceLocationInfo.deviceSpeed
         }
 
         required init?(coder aDecoder: NSCoder) {
@@ -191,6 +194,7 @@ extension OpenLocateLocation {
             ssid = aDecoder.decodeObject(forKey: OpenLocateLocation.Keys.wifissid) as? String
             context = aDecoder.decodeObject(forKey: OpenLocateLocation.Keys.locationContext) as? String
             course = aDecoder.decodeObject(forKey: OpenLocateLocation.Keys.course) as? Double
+            speed = aDecoder.decodeObject(forKey: OpenLocateLocation.Keys.speed) as? Double
         }
 
         func encode(with aCoder: NSCoder) {
@@ -206,6 +210,7 @@ extension OpenLocateLocation {
             aCoder.encode(ssid, forKey: OpenLocateLocation.Keys.wifissid)
             aCoder.encode(context, forKey: OpenLocateLocation.Keys.locationContext)
             aCoder.encode(course, forKey: OpenLocateLocation.Keys.course)
+            aCoder.encode(speed, forKey: OpenLocateLocation.Keys.speed)
         }
     }
 }

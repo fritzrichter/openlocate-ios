@@ -1,5 +1,5 @@
 //
-//  LogConfiguration.swift
+//  DeviceLocationInfo.swift
 //
 //  Copyright (c) 2017 OpenLocate
 //
@@ -22,21 +22,9 @@
 //  SOFTWARE.
 //
 
-/// Configuration which describes all data which is sending from the device
-public struct LogConfiguration {
-    /// Determines whether network information is sending or not. Default value is true.
-    public let shouldLogNetworkInfo: Bool
+import Foundation
 
-    /// Determines whether device course (bearing) is sending or not. Default value is true.
-    public let shouldLogDeviceCourse: Bool
-
-    /// Determines whether device speed is sending or not. Default value is true.
-    public let shouldLogDeviceSpeed: Bool
-
-    /// Default configuration. All parameters are set to true.
-    public static let `default` = LogConfiguration(
-        shouldLogNetworkInfo: true,
-        shouldLogDeviceCourse: true,
-        shouldLogDeviceSpeed: true
-    )
+struct DeviceLocationInfo {
+    let deviceCourse: Double?
+    let deviceSpeed: Double?
 }

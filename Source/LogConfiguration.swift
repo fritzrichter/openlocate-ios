@@ -25,22 +25,26 @@
 /// Configuration which describes all data which is sending from the device
 public struct LogConfiguration {
     /// Determines whether network information is sending or not. Default value is true.
-    public let shouldLogNetworkInfo: Bool
+    public var shouldLogNetworkInfo: Bool
 
     /// Determines whether device course (bearing) is sending or not. Default value is true.
-    public let shouldLogDeviceCourse: Bool
+    public var shouldLogDeviceCourse: Bool
 
     /// Determines whether device speed is sending or not. Default value is true.
-    public let shouldLogDeviceSpeed: Bool
+    public var shouldLogDeviceSpeed: Bool
 
-    /// Determines whether device is charging. Default value is true.
-    public let shouldLogDeviceCharging: Bool
+    /// Determines whether device charging status should be sent ot not. Default value is true.
+    public var shouldLogDeviceCharging: Bool
+
+    /// Determines whether device model should be sent. Default value is true
+    public var shouldLogDeviceModel: Bool
 
     /// Default configuration. All parameters are set to true.
     public static let `default` = LogConfiguration(
         shouldLogNetworkInfo: true,
         shouldLogDeviceCourse: true,
         shouldLogDeviceSpeed: true,
-        shouldLogDeviceCharging: true
+        shouldLogDeviceCharging: true,
+        shouldLogDeviceModel: true
     )
 }

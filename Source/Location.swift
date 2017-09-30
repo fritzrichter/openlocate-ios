@@ -63,6 +63,7 @@ public struct OpenLocateLocation: OpenLocateLocationType {
         static let course = "course"
         static let speed = "speed"
         static let isCharging = "is_charging"
+        static let deviceModel = "device_model"
     }
 
     enum Context: String {
@@ -115,6 +116,7 @@ extension OpenLocateLocation {
             Keys.course: deviceLocationInfo.deviceCourse ?? NSNull(),
             Keys.speed: deviceLocationInfo.deviceSpeed ?? NSNull(),
             Keys.isCharging: deviceInfo.isCharging ?? NSNull(),
+            Keys.deviceModel: deviceInfo.deviceModel ?? NSNull(),
             Keys.locationContext: context.rawValue
         ]
     }
@@ -142,7 +144,7 @@ extension OpenLocateLocation {
 
         self.networkInfo = NetworkInfo(bssid: coding.bssid, ssid: coding.ssid)
         self.deviceLocationInfo = DeviceLocationInfo(deviceCourse: coding.course, deviceSpeed: coding.speed)
-        self.deviceInfo = DeviceInfo(isCharging: coding.isCharging)
+        self.deviceInfo = DeviceInfo(isCharging: coding.isCharging, deviceModel: coding.deviceModel)
 
         if let contextString = coding.context, let context = Context(rawValue: contextString) {
             self.context = context
@@ -170,6 +172,7 @@ extension OpenLocateLocation {
         let course: Double?
         let speed: Double?
         let isCharging: Bool?
+        let deviceModel: String?
 
         init(_ location: OpenLocateLocation) {
             latitude = location.location.coordinate.latitude
@@ -186,6 +189,7 @@ extension OpenLocateLocation {
             course = location.deviceLocationInfo.deviceCourse
             speed = location.deviceLocationInfo.deviceSpeed
             isCharging = location.deviceInfo.isCharging
+            deviceModel = location.deviceInfo.deviceModel
         }
 
         required init?(coder aDecoder: NSCoder) {
@@ -203,6 +207,7 @@ extension OpenLocateLocation {
             course = aDecoder.decodeObject(forKey: OpenLocateLocation.Keys.course) as? Double
             speed = aDecoder.decodeObject(forKey: OpenLocateLocation.Keys.speed) as? Double
             isCharging = aDecoder.decodeObject(forKey: OpenLocateLocation.Keys.isCharging) as? Bool
+            deviceModel = aDecoder.decodeObject(forKey: OpenLocateLocation.Keys.deviceModel) as? String
         }
 
         func encode(with aCoder: NSCoder) {
@@ -220,6 +225,7 @@ extension OpenLocateLocation {
             aCoder.encode(course, forKey: OpenLocateLocation.Keys.course)
             aCoder.encode(speed, forKey: OpenLocateLocation.Keys.speed)
             aCoder.encode(isCharging, forKey: OpenLocateLocation.Keys.isCharging)
+            aCoder.encode(deviceModel, forKey: OpenLocateLocation.Keys.deviceModel)
         }
     }
 }

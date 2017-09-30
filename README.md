@@ -122,7 +122,7 @@ By default all these fields are collected. Naturally you can choose what fields 
 For example, you want to send information about network and device speed, but don't want device course. Than you should do so:
 
 ```swift
-let logConfiguration = LogConfiguration(shouldLogNetworkInfo: true, shouldLogDeviceCourse: false, shouldLogDeviceSpeed: true)
+    let logConfiguration = LogConfiguration(shouldLogNetworkInfo: true, shouldLogDeviceCourse: false, shouldLogDeviceSpeed: true)
     let configuration = Configuration(url: url, headers: headers, logConfiguration: logConfiguration)
 ```
 

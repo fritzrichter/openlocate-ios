@@ -90,7 +90,7 @@ final class LocationService: LocationServiceType {
                     .build()
                 return OpenLocateLocation(location: $0.location,
                                           advertisingInfo: self.advertisingInfo,
-                                          info: info,
+                                          openLocateInfo: info,
                                           context: $0.context)
             }
 

@@ -50,7 +50,7 @@ final class OpenLocateLocationTests: BaseTestCase {
         //When
         let location = OpenLocateLocation(location: coreLocation,
                                           advertisingInfo: adInfo,
-                                          info: info,
+                                          openLocateInfo: info,
                                           context: .visitExit)
         let jsonDict = location.json as? JsonDictionary
         let json = jsonDict!

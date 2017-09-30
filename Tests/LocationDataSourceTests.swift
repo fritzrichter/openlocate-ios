@@ -55,7 +55,7 @@ class LocationDataSourceTests: BaseTestCase {
         return OpenLocateLocation(
             location: coreLocation,
             advertisingInfo: advertisingInfo,
-            info: info
+            openLocateInfo: info
         )
     }
 
@@ -171,7 +171,7 @@ class LocationListDataSource: BaseTestCase {
         return OpenLocateLocation(
             location: coreLocation,
             advertisingInfo: advertisingInfo,
-            info: info
+            openLocateInfo: info
         )
     }
 

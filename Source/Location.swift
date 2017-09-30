@@ -86,13 +86,13 @@ public struct OpenLocateLocation: OpenLocateLocationType {
 
     init(location: CLLocation,
          advertisingInfo: AdvertisingInfo,
-         info: OpenLocateInfo,
+         openLocateInfo: OpenLocateInfo,
          context: Context = .unknown) {
 
         self.location = location
         self.advertisingInfo = advertisingInfo
-        self.networkInfo = info.networkInfo
-        self.deviceLocationInfo = info.deviceLocationInfo
+        self.networkInfo = openLocateInfo.networkInfo
+        self.deviceLocationInfo = openLocateInfo.deviceLocationInfo
         self.context = context
     }
 }

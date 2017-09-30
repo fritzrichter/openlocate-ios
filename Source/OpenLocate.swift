@@ -145,7 +145,7 @@ extension OpenLocate {
 
         let openlocateLocation = OpenLocateLocation(location: location,
                                                     advertisingInfo: advertisingInfo,
-                                                    info: info)
+                                                    openLocateInfo: info)
         completion(openlocateLocation, nil)
     }
 }

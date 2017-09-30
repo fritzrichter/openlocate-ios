@@ -121,7 +121,7 @@ The following fields are collected by the SDK to be sent to a private or public 
 11. `device_model` - Model of the user's phone
 
 By default all these fields are collected. Naturally you can choose what fields you'd like to collect. You just need to configure configuration in such way.
-For example, you want to send information about network and device speed, but don't want device course and charging. Than you should do so:
+For example, you want to send all fields except device course and charging. Than you should do so:
 
 ```swift
     var logConfiguration = LogConfiguration.default // At this point all your fields will be sending

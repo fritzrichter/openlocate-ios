@@ -87,7 +87,6 @@ final class LocationService: LocationServiceType {
                 let info = OpenLocateInfo.Builder(logConfiguration: self.logConfiguration)
                     .set(location: $0.location)
                     .set(network: NetworkInfo.currentNetworkInfo())
-                    .set(deviceInfo: DeviceInfo.currentDeviceInfo(withLogConfiguration: self.logConfiguration))
                     .build()
                 return OpenLocateLocation(location: $0.location,
                                           advertisingInfo: self.advertisingInfo,

@@ -68,7 +68,7 @@ extension OpenLocateInfo {
             let speed = logConfiguration.shouldLogDeviceSpeed ? self.location?.speed : nil
             let deviceLocationInfo = DeviceLocationInfo(deviceCourse: course, deviceSpeed: speed)
 
-            let deviceInfo = DeviceInfo.currentDeviceInfo(withLogConfiguration: logConfiguration)
+            let deviceInfo = self.deviceInfo ?? DeviceInfo.currentDeviceInfo(withLogConfiguration: logConfiguration)
 
             return OpenLocateInfo(networkInfo: networkInfo,
                                   deviceLocationInfo: deviceLocationInfo,

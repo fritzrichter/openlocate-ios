@@ -62,6 +62,7 @@ public struct OpenLocateLocation: OpenLocateLocationType {
         static let locationContext = "location_context"
         static let course = "course"
         static let speed = "speed"
+        static let isCharging = "is_charging"
     }
 
     enum Context: String {
@@ -78,6 +79,7 @@ public struct OpenLocateLocation: OpenLocateLocationType {
     let advertisingInfo: AdvertisingInfo
     let networkInfo: NetworkInfo
     let deviceLocationInfo: DeviceLocationInfo
+    let deviceInfo: DeviceInfo
     let context: Context
 
     var debugDescription: String {
@@ -93,6 +95,7 @@ public struct OpenLocateLocation: OpenLocateLocationType {
         self.advertisingInfo = advertisingInfo
         self.networkInfo = openLocateInfo.networkInfo
         self.deviceLocationInfo = openLocateInfo.deviceLocationInfo
+        self.deviceInfo = openLocateInfo.deviceInfo
         self.context = context
     }
 }
@@ -111,6 +114,7 @@ extension OpenLocateLocation {
             Keys.wifissid: networkInfo.ssid ?? NSNull(),
             Keys.course: deviceLocationInfo.deviceCourse ?? NSNull(),
             Keys.speed: deviceLocationInfo.deviceSpeed ?? NSNull(),
+            Keys.isCharging: deviceInfo.isCharging ?? NSNull(),
             Keys.locationContext: context.rawValue
         ]
     }
@@ -138,6 +142,7 @@ extension OpenLocateLocation {
 
         self.networkInfo = NetworkInfo(bssid: coding.bssid, ssid: coding.ssid)
         self.deviceLocationInfo = DeviceLocationInfo(deviceCourse: coding.course, deviceSpeed: coding.speed)
+        self.deviceInfo = DeviceInfo(isCharging: coding.isCharging)
 
         if let contextString = coding.context, let context = Context(rawValue: contextString) {
             self.context = context
@@ -164,6 +169,7 @@ extension OpenLocateLocation {
         let context: String?
         let course: Double?
         let speed: Double?
+        let isCharging: Bool?
 
         init(_ location: OpenLocateLocation) {
             latitude = location.location.coordinate.latitude
@@ -179,6 +185,7 @@ extension OpenLocateLocation {
             context = location.context.rawValue
             course = location.deviceLocationInfo.deviceCourse
             speed = location.deviceLocationInfo.deviceSpeed
+            isCharging = location.deviceInfo.isCharging
         }
 
         required init?(coder aDecoder: NSCoder) {
@@ -195,6 +202,7 @@ extension OpenLocateLocation {
             context = aDecoder.decodeObject(forKey: OpenLocateLocation.Keys.locationContext) as? String
             course = aDecoder.decodeObject(forKey: OpenLocateLocation.Keys.course) as? Double
             speed = aDecoder.decodeObject(forKey: OpenLocateLocation.Keys.speed) as? Double
+            isCharging = aDecoder.decodeObject(forKey: OpenLocateLocation.Keys.isCharging) as? Bool
         }
 
         func encode(with aCoder: NSCoder) {
@@ -211,6 +219,7 @@ extension OpenLocateLocation {
             aCoder.encode(context, forKey: OpenLocateLocation.Keys.locationContext)
             aCoder.encode(course, forKey: OpenLocateLocation.Keys.course)
             aCoder.encode(speed, forKey: OpenLocateLocation.Keys.speed)
+            aCoder.encode(isCharging, forKey: OpenLocateLocation.Keys.isCharging)
         }
     }
 }

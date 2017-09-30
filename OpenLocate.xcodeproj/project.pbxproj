@@ -38,6 +38,7 @@
 		48E45DEF1F09384C006EAF6F /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E45DEE1F09384B006EAF6F /* Location.swift */; };
 		48E45DF11F094506006EAF6F /* LocationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E45DF01F094506006EAF6F /* LocationTests.swift */; };
 		48F0DCC71F3B3A89004C4943 /* HttpResponseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48F0DCC61F3B3A89004C4943 /* HttpResponseTests.swift */; };
+		DE2440ED1F7FD5D0006E4C0E /* DeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2440EC1F7FD5D0006E4C0E /* DeviceInfo.swift */; };
 		DE2D17EC1F7838140074B3E4 /* LocationManagerType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2D17EB1F7838140074B3E4 /* LocationManagerType.swift */; };
 		DED3CECF1F7EE18F002DDE5D /* LogConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED3CECE1F7EE18F002DDE5D /* LogConfiguration.swift */; };
 		DED3CED91F7F1675002DDE5D /* DeviceLocationInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED3CED81F7F1675002DDE5D /* DeviceLocationInfo.swift */; };
@@ -92,6 +93,7 @@
 		48E45DEE1F09384B006EAF6F /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Location.swift; path = Source/Location.swift; sourceTree = "<group>"; };
 		48E45DF01F094506006EAF6F /* LocationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationTests.swift; sourceTree = "<group>"; };
 		48F0DCC61F3B3A89004C4943 /* HttpResponseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HttpResponseTests.swift; sourceTree = "<group>"; };
+		DE2440EC1F7FD5D0006E4C0E /* DeviceInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DeviceInfo.swift; path = Source/DeviceInfo.swift; sourceTree = "<group>"; };
 		DE2D17EB1F7838140074B3E4 /* LocationManagerType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LocationManagerType.swift; path = Source/LocationManagerType.swift; sourceTree = "<group>"; };
 		DED3CECE1F7EE18F002DDE5D /* LogConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LogConfiguration.swift; path = Source/LogConfiguration.swift; sourceTree = "<group>"; };
 		DED3CED81F7F1675002DDE5D /* DeviceLocationInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DeviceLocationInfo.swift; path = Source/DeviceLocationInfo.swift; sourceTree = "<group>"; };
@@ -225,6 +227,7 @@
 				48D6E7F71F38790D00EC76A8 /* Advertising.swift */,
 				111E607E1F758494004B2D20 /* NetworkInfo.swift */,
 				DED3CED81F7F1675002DDE5D /* DeviceLocationInfo.swift */,
+				DE2440EC1F7FD5D0006E4C0E /* DeviceInfo.swift */,
 			);
 			name = Core;
 			sourceTree = "<group>";
@@ -422,6 +425,7 @@
 				DED3CED91F7F1675002DDE5D /* DeviceLocationInfo.swift in Sources */,
 				48E45DEF1F09384C006EAF6F /* Location.swift in Sources */,
 				48D134671F0A3DAE0075EFBC /* Dictionary+Extensions.swift in Sources */,
+				DE2440ED1F7FD5D0006E4C0E /* DeviceInfo.swift in Sources */,
 				4876E9601F09EB45006EF61C /* LocationService.swift in Sources */,
 				489700DA1F04EA7D00D8C27C /* OpenLocate.swift in Sources */,
 				DED3CEDB1F7F16AE002DDE5D /* OpenLocateInfo.swift in Sources */,

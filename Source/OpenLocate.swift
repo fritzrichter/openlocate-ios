@@ -141,6 +141,7 @@ extension OpenLocate {
         let info = OpenLocateInfo.Builder(logConfiguration: logConfiguration)
             .set(location: location)
             .set(network: NetworkInfo.currentNetworkInfo())
+            .set(deviceInfo: DeviceInfo.currentDeviceInfo(withLogConfiguration: logConfiguration))
             .build()
 
         let openlocateLocation = OpenLocateLocation(location: location,

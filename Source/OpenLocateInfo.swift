@@ -28,6 +28,7 @@ import CoreLocation.CLLocation
 struct OpenLocateInfo {
     let networkInfo: NetworkInfo
     let deviceLocationInfo: DeviceLocationInfo
+    let deviceInfo: DeviceInfo
 }
 
 extension OpenLocateInfo {
@@ -35,6 +36,7 @@ extension OpenLocateInfo {
         let logConfiguration: LogConfiguration
 
         private var location: CLLocation?
+        private var deviceInfo: DeviceInfo?
         private var networkInfo: NetworkInfo = .currentNetworkInfo()
 
         init(logConfiguration: LogConfiguration) {
@@ -53,6 +55,12 @@ extension OpenLocateInfo {
             return self
         }
 
+        func set(deviceInfo: DeviceInfo) -> Builder {
+            self.deviceInfo = deviceInfo
+
+            return self
+        }
+
         func build() -> OpenLocateInfo {
             let networkInfo = logConfiguration.shouldLogNetworkInfo ? self.networkInfo : NetworkInfo()
 
@@ -60,7 +68,11 @@ extension OpenLocateInfo {
             let speed = logConfiguration.shouldLogDeviceSpeed ? self.location?.speed : nil
             let deviceLocationInfo = DeviceLocationInfo(deviceCourse: course, deviceSpeed: speed)
 
-            return OpenLocateInfo(networkInfo: networkInfo, deviceLocationInfo: deviceLocationInfo)
+            let deviceInfo = DeviceInfo.currentDeviceInfo(withLogConfiguration: logConfiguration)
+
+            return OpenLocateInfo(networkInfo: networkInfo,
+                                  deviceLocationInfo: deviceLocationInfo,
+                                  deviceInfo: deviceInfo)
         }
     }
 }

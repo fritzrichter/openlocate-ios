@@ -33,10 +33,14 @@ public struct LogConfiguration {
     /// Determines whether device speed is sending or not. Default value is true.
     public let shouldLogDeviceSpeed: Bool
 
+    /// Determines whether device is charging. Default value is true.
+    public let shouldLogDeviceCharging: Bool
+
     /// Default configuration. All parameters are set to true.
     public static let `default` = LogConfiguration(
         shouldLogNetworkInfo: true,
         shouldLogDeviceCourse: true,
-        shouldLogDeviceSpeed: true
+        shouldLogDeviceSpeed: true,
+        shouldLogDeviceCharging: true
     )
 }

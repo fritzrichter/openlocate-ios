@@ -40,3 +40,37 @@ public struct LogConfiguration {
         shouldLogDeviceSpeed: true
     )
 }
+
+public extension LogConfiguration {
+    final public class Builder {
+        private var shouldLogNetworkInfo = true
+        private var shouldLogDeviceCourse = true
+        private var shouldLogDeviceSpeed = true
+
+        public init() {}
+
+        public func set(shouldLogNetworkInfo: Bool) -> Builder {
+            self.shouldLogNetworkInfo = shouldLogNetworkInfo
+
+            return self
+        }
+
+        public func set(shouldLogDeviceCourse: Bool) -> Builder {
+            self.shouldLogDeviceCourse = shouldLogDeviceCourse
+
+            return self
+        }
+
+        public func set(shouldLogDeviceSpeed: Bool) -> Builder {
+            self.shouldLogDeviceSpeed = shouldLogDeviceSpeed
+
+            return self
+        }
+
+        public func build() -> LogConfiguration {
+            return LogConfiguration(shouldLogNetworkInfo: shouldLogNetworkInfo,
+                                    shouldLogDeviceCourse: shouldLogDeviceCourse,
+                                    shouldLogDeviceSpeed: shouldLogDeviceSpeed)
+        }
+    }
+}

@@ -69,4 +69,19 @@ final class OpenLocateLocationTests: BaseTestCase {
         XCTAssertEqual((json["speed"] as? Double)!, Double(exactly: 20.0))
         XCTAssertEqual((json["location_context"] as? String)!, "visit_exit")
     }
+
+    func testInitMethodWithIncorrectData() {
+        // Given
+        let data = Data()
+
+        // Then
+        do {
+            _ = try OpenLocateLocation(data: data)
+        } catch OpenLocateLocationError.unarchivingCannotBeDone {
+
+        } catch {
+            XCTFail("Error is incorrect. Sholud be OpenLocateLocationError.unarchivingCannotBeDone")
+        }
+
+    }
 }

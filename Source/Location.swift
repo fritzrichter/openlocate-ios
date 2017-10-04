@@ -117,9 +117,10 @@ extension OpenLocateLocation {
 }
 
 extension OpenLocateLocation {
-    init(data: Data) {
-        let unwrappedCoding = NSKeyedUnarchiver.unarchiveObject(with: data) as? Coding
-        let coding = unwrappedCoding!
+    init(data: Data) throws {
+        guard let coding = NSKeyedUnarchiver.unarchiveObject(with: data) as? Coding else {
+            throw OpenLocateLocationError.unarchivingCannotBeDone
+        }
 
         self.location = CLLocation(
             coordinate: CLLocationCoordinate2DMake(coding.latitude, coding.longitude),

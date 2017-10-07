@@ -43,7 +43,7 @@ final class OpenLocateLocationTests: BaseTestCase {
         let networkInfo = NetworkInfo(bssid: "bssid_goes_here", ssid: "ssid_goes_here")
         let deviceInfo = DeviceInfo(isCharging: false)
 
-        let info = OpenLocateInfo.Builder(logConfiguration: .default)
+        let info = CollectingFields.Builder(configuration: .default)
             .set(location: coreLocation)
             .set(network: networkInfo)
             .set(deviceInfo: deviceInfo)
@@ -52,7 +52,7 @@ final class OpenLocateLocationTests: BaseTestCase {
         //When
         let location = OpenLocateLocation(location: coreLocation,
                                           advertisingInfo: adInfo,
-                                          openLocateInfo: info,
+                                          collectingFields: info,
                                           context: .visitExit)
         let jsonDict = location.json as? JsonDictionary
         let json = jsonDict!
@@ -71,5 +71,20 @@ final class OpenLocateLocationTests: BaseTestCase {
         XCTAssertEqual((json["speed"] as? Double)!, Double(exactly: 20.0))
         XCTAssertEqual((json["is_charging"] as? Bool)!, false)
         XCTAssertEqual((json["location_context"] as? String)!, "visit_exit")
+    }
+
+    func testInitMethodWithIncorrectData() {
+        // Given
+        let data = Data()
+
+        // Then
+        do {
+            _ = try OpenLocateLocation(data: data)
+        } catch OpenLocateLocationError.unarchivingCannotBeDone {
+
+        } catch {
+            XCTFail("Error is incorrect. Sholud be OpenLocateLocationError.unarchivingCannotBeDone")
+        }
+
     }
 }

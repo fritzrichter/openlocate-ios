@@ -43,3 +43,7 @@ public enum PlaceError: Error {
         static let invalidLocationJsonMessage = "Invalid location. Please try again"
     }
 }
+
+enum OpenLocateLocationError: Error {
+    case unarchivingCannotBeDone
+}

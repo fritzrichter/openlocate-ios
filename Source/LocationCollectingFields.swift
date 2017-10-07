@@ -1,5 +1,5 @@
 //
-//  LogConfiguration.swift
+//  LocationCollectingFields.swift
 //
 //  Copyright (c) 2017 OpenLocate
 //
@@ -22,25 +22,11 @@
 //  SOFTWARE.
 //
 
-/// Configuration which describes all data which is sending from the device
-public struct LogConfiguration {
-    /// Determines whether network information is sending or not. Default value is true.
-    public let shouldLogNetworkInfo: Bool
+/// Location fields' values which are sending from device
+struct LocationCollectingFields {
+    /// Course of the location in degrees true North
+    let course: Double?
 
-    /// Determines whether device course (bearing) is sending or not. Default value is true.
-    public let shouldLogDeviceCourse: Bool
-
-    /// Determines whether device speed is sending or not. Default value is true.
-    public let shouldLogDeviceSpeed: Bool
-
-    /// Determines whether device is charging. Default value is true.
-    public let shouldLogDeviceCharging: Bool
-
-    /// Default configuration. All parameters are set to true.
-    public static let `default` = LogConfiguration(
-        shouldLogNetworkInfo: true,
-        shouldLogDeviceCourse: true,
-        shouldLogDeviceSpeed: true,
-        shouldLogDeviceCharging: true
-    )
+    /// Speed of the location in m/s
+    let speed: Double?
 }

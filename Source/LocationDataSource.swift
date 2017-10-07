@@ -138,7 +138,7 @@ final class LocationDatabase: LocationDataSourceType {
                 let data = result.dataValue(column: Constants.columnLocation)
 
                 if let data = data {
-                    return (index, OpenLocateLocation(data: data))
+                    return (index, try OpenLocateLocation(data: data))
                 }
             }
         } catch let error {
@@ -166,7 +166,7 @@ final class LocationDatabase: LocationDataSourceType {
 
                 if let data = data {
                     locations.append(
-                        (index, OpenLocateLocation(data: data))
+                        (index, try OpenLocateLocation(data: data))
                     )
                 }
             }

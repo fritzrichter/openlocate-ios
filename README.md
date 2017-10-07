@@ -45,11 +45,26 @@ pod 'OpenLocate'
 
 ### Initialize tracking
 
-1. Add `NSLocationAlwaysAndWhenInUseUsageDescription` in the `info.plist` of your application
+1. Add permission keys for location tracking in the `Info.plist` of your application
 
+For **Xcode 9:**
 ```xml
+<key>NSLocationAlwaysUsageDescription</key>
+<string>OpenLocate would like to access location.</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>OpenLocate would like to access location.</string>
 <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>This application would like to access your location.</string>
+<string>OpenLocate would like to access location.</string>
+```
+
+If you are using **Xcode 8** you need one of these keys:
+```xml
+<key>NSLocationAlwaysUsageDescription</key>
+<string>OpenLocate would like to access location.</string>
+```
+```xml
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>OpenLocate would like to access location.</string>
 ```
 
 2. Configure where the SDK should send data to by building the configuration with appropriate URL and headers. Supply the configuration to the `initialize` method. Ensure that the initialize method is invoked in the `application:didFinishLaunchingWithOptions:` method in your `UIApplicationDelegate`
@@ -119,15 +134,14 @@ The following fields are collected by the SDK to be sent to a private or public 
 9. `speed` - The instantaneous speed of the device, measured in meters per second
 10. `is_charging` - Indicates if device is charging.
 
-By default all these fields are collected. Naturally you can choose what fields you'd like to collect. You just need to configure configuration in such way.
-For example, you want to send information about network and device speed, but don't want device course and charging. Than you should do so:
+By default all these fields are collected. Naturally, you can choose what fields you'd like to collect. You just need to set configuration in such way.
+For example, you want to send information about network and device speed, but don't want device course. Than you should do so:
 
 ```swift
-    let logConfiguration = LogConfiguration(shouldLogNetworkInfo: true,
-                                            shouldLogDeviceCourse: false,
-                                            shouldLogDeviceSpeed: true,
-                                            shouldLogDeviceCharging: false)
-    let configuration = Configuration(url: url, headers: headers, logConfiguration: logConfiguration)
+    let fieldsConfiguration = CollectingFieldsConfiguration.Builder()
+                               .set(shouldLogDeviceCourse: false)
+                               .build()
+    let configuration = Configuration(url: url, headers: headers, collectingFieldsConfiguration: fieldsConfiguration)
 ```
 
 ## Communication

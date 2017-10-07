@@ -48,7 +48,7 @@ class LocationDataSourceTests: BaseTestCase {
         let networkInfo = NetworkInfo(bssid: "bssid_goes_here", ssid: "ssid_goes_here")
         let deviceInfo = DeviceInfo(isCharging: false)
 
-        let info = OpenLocateInfo.Builder(logConfiguration: .default)
+        let info = CollectingFields.Builder(configuration: .default)
             .set(location: coreLocation)
             .set(network: networkInfo)
             .set(deviceInfo: deviceInfo)
@@ -57,7 +57,7 @@ class LocationDataSourceTests: BaseTestCase {
         return OpenLocateLocation(
             location: coreLocation,
             advertisingInfo: advertisingInfo,
-            openLocateInfo: info
+            collectingFields: info
         )
     }
 
@@ -136,11 +136,15 @@ class LocationDataSourceTests: BaseTestCase {
         let firstIndexedLocation = locations.first()
 
         // Then
-        let firstLocation = OpenLocateLocation(data: firstIndexedLocation!.1.data)
-        XCTAssertEqual(firstLocation.location.coordinate.latitude, testLocation.location.coordinate.latitude)
-        XCTAssertEqual(firstLocation.location.coordinate.longitude, testLocation.location.coordinate.longitude)
-        XCTAssertEqual(firstLocation.location.timestamp.timeIntervalSince1970,
-                       testLocation.location.timestamp.timeIntervalSince1970, accuracy: 0.1)
+        do {
+            let firstLocation = try OpenLocateLocation(data: firstIndexedLocation!.1.data)
+            XCTAssertEqual(firstLocation.location.coordinate.latitude, testLocation.location.coordinate.latitude)
+            XCTAssertEqual(firstLocation.location.coordinate.longitude, testLocation.location.coordinate.longitude)
+            XCTAssertEqual(firstLocation.location.timestamp.timeIntervalSince1970,
+                           testLocation.location.timestamp.timeIntervalSince1970, accuracy: 0.1)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
     }
 }
 
@@ -166,7 +170,7 @@ class LocationListDataSource: BaseTestCase {
         let networkInfo = NetworkInfo(bssid: "bssid_goes_here", ssid: "ssid_goes_here")
         let deviceInfo = DeviceInfo(isCharging: false)
 
-        let info = OpenLocateInfo.Builder(logConfiguration: .default)
+        let info = CollectingFields.Builder(configuration: .default)
             .set(location: coreLocation)
             .set(network: networkInfo)
             .set(deviceInfo: deviceInfo)
@@ -175,7 +179,7 @@ class LocationListDataSource: BaseTestCase {
         return OpenLocateLocation(
             location: coreLocation,
             advertisingInfo: advertisingInfo,
-            openLocateInfo: info
+            collectingFields: info
         )
     }
 
@@ -249,13 +253,17 @@ class LocationListDataSource: BaseTestCase {
         let firstIndexedLocation = locations.first()
 
         // Then
-        let firstLocation = OpenLocateLocation(data: firstIndexedLocation!.1.data)
-        XCTAssertEqual(firstLocation.location.coordinate.latitude, testLocation.location.coordinate.latitude)
-        XCTAssertEqual(firstLocation.location.coordinate.longitude, testLocation.location.coordinate.longitude)
-        XCTAssertEqual(firstLocation.deviceLocationInfo.deviceCourse, testLocation.location.course)
-        XCTAssertEqual(firstLocation.deviceLocationInfo.deviceSpeed, testLocation.location.speed)
-        XCTAssertEqual(firstLocation.deviceInfo.isCharging, testLocation.deviceInfo.isCharging)
-        XCTAssertEqual(firstLocation.location.timestamp.timeIntervalSince1970,
-                       testLocation.location.timestamp.timeIntervalSince1970, accuracy: 0.1)
+        do {
+            let firstLocation = try OpenLocateLocation(data: firstIndexedLocation!.1.data)
+            XCTAssertEqual(firstLocation.location.coordinate.latitude, testLocation.location.coordinate.latitude)
+            XCTAssertEqual(firstLocation.location.coordinate.longitude, testLocation.location.coordinate.longitude)
+            XCTAssertEqual(firstLocation.locationFields.course, testLocation.location.course)
+            XCTAssertEqual(firstLocation.locationFields.speed, testLocation.location.speed)
+            XCTAssertEqual(firstLocation.deviceInfo.isCharging, testLocation.deviceInfo.isCharging)
+            XCTAssertEqual(firstLocation.location.timestamp.timeIntervalSince1970,
+            testLocation.location.timestamp.timeIntervalSince1970, accuracy: 0.1)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
     }
 }

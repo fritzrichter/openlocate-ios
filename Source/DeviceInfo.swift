@@ -18,7 +18,7 @@ extension UIDevice {
 struct DeviceInfo {
     let isCharging: Bool?
 
-    static func currentDeviceInfo(withLogConfiguration configuration: LogConfiguration) -> DeviceInfo {
+    static func currentDeviceInfo(configuration: CollectingFieldsConfiguration) -> DeviceInfo {
         let currentDevice = UIDevice.current
         let isCharging = configuration.shouldLogDeviceCharging ? currentDevice.isCharging : nil
 

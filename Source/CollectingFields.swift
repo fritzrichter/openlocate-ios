@@ -28,7 +28,7 @@ import CoreLocation.CLLocation
 struct CollectingFields {
     let networkInfo: NetworkInfo
     let locationFields: LocationCollectingFields
-    let deviceInfo: DeviceInfo
+    let deviceInfo: DeviceCollectingFields
 }
 
 extension CollectingFields {
@@ -36,7 +36,7 @@ extension CollectingFields {
         let configuration: CollectingFieldsConfiguration
 
         private var location: CLLocation?
-        private var deviceInfo: DeviceInfo?
+        private var deviceInfo: DeviceCollectingFields?
         private var networkInfo: NetworkInfo = .currentNetworkInfo()
 
         init(configuration: CollectingFieldsConfiguration) {
@@ -55,7 +55,7 @@ extension CollectingFields {
             return self
         }
 
-        func set(deviceInfo: DeviceInfo) -> Builder {
+        func set(deviceInfo: DeviceCollectingFields) -> Builder {
             self.deviceInfo = deviceInfo
 
             return self
@@ -67,7 +67,7 @@ extension CollectingFields {
             let course = configuration.shouldLogDeviceCourse ? self.location?.course : nil
             let speed = configuration.shouldLogDeviceSpeed ? self.location?.speed : nil
             let deviceLocationInfo = LocationCollectingFields(course: course, speed: speed)
-            let deviceInfo = DeviceInfo.currentDeviceInfo(configuration: configuration)
+            let deviceInfo = DeviceCollectingFields.configure(with: configuration)
 
             return CollectingFields(networkInfo: networkInfo,
                                     locationFields: deviceLocationInfo,

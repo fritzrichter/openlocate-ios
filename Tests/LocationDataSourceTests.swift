@@ -46,7 +46,7 @@ class LocationDataSourceTests: BaseTestCase {
             .build()
 
         let networkInfo = NetworkInfo(bssid: "bssid_goes_here", ssid: "ssid_goes_here")
-        let deviceInfo = DeviceInfo(isCharging: false)
+        let deviceInfo = DeviceCollectingFields(isCharging: false)
 
         let info = CollectingFields.Builder(configuration: .default)
             .set(location: coreLocation)
@@ -168,7 +168,7 @@ class LocationListDataSource: BaseTestCase {
             .build()
 
         let networkInfo = NetworkInfo(bssid: "bssid_goes_here", ssid: "ssid_goes_here")
-        let deviceInfo = DeviceInfo(isCharging: false)
+        let deviceInfo = DeviceCollectingFields(isCharging: false)
 
         let info = CollectingFields.Builder(configuration: .default)
             .set(location: coreLocation)

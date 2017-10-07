@@ -87,7 +87,7 @@ final class LocationService: LocationServiceType {
                 let info = CollectingFields.Builder(configuration: self.collectingFieldsConfiguration)
                     .set(location: $0.location)
                     .set(network: NetworkInfo.currentNetworkInfo())
-                    .set(deviceInfo: DeviceInfo.currentDeviceInfo(configuration: self.collectingFieldsConfiguration))
+                    .set(deviceInfo: DeviceCollectingFields.configure(with: self.collectingFieldsConfiguration))
                     .build()
                 return OpenLocateLocation(location: $0.location,
                                           advertisingInfo: self.advertisingInfo,

@@ -141,7 +141,7 @@ extension OpenLocate {
         let fieldsContainer = CollectingFields.Builder(configuration: fieldsConfiguration)
             .set(location: location)
             .set(network: NetworkInfo.currentNetworkInfo())
-            .set(deviceInfo: DeviceInfo.currentDeviceInfo(configuration: fieldsConfiguration))
+            .set(deviceInfo: DeviceCollectingFields.configure(with: fieldsConfiguration))
             .build()
 
         let openlocateLocation = OpenLocateLocation(location: location,

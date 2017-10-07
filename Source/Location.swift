@@ -79,7 +79,7 @@ public struct OpenLocateLocation: OpenLocateLocationType {
     let advertisingInfo: AdvertisingInfo
     let networkInfo: NetworkInfo
     let locationFields: LocationCollectingFields
-    let deviceInfo: DeviceInfo
+    let deviceInfo: DeviceCollectingFields
     let context: Context
 
     var debugDescription: String {
@@ -143,7 +143,7 @@ extension OpenLocateLocation {
 
         self.networkInfo = NetworkInfo(bssid: coding.bssid, ssid: coding.ssid)
         self.locationFields = LocationCollectingFields(course: coding.course, speed: coding.speed)
-        self.deviceInfo = DeviceInfo(isCharging: coding.isCharging)
+        self.deviceInfo = DeviceCollectingFields(isCharging: coding.isCharging)
 
         if let contextString = coding.context, let context = Context(rawValue: contextString) {
             self.context = context

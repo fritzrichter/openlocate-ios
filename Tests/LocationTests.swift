@@ -41,7 +41,7 @@ final class OpenLocateLocationTests: BaseTestCase {
 
         let adInfo = AdvertisingInfo.Builder().set(advertisingId: "2345").set(isLimitedAdTrackingEnabled: true).build()
         let networkInfo = NetworkInfo(bssid: "bssid_goes_here", ssid: "ssid_goes_here")
-        let deviceInfo = DeviceInfo(isCharging: false)
+        let deviceInfo = DeviceCollectingFields(isCharging: false)
 
         let info = CollectingFields.Builder(configuration: .default)
             .set(location: coreLocation)

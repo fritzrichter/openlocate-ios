@@ -137,10 +137,10 @@ By default all these fields are collected. Naturally, you can choose what fields
 For example, you want to send information about network and device speed, but don't want device course. Than you should do so:
 
 ```swift
-    let logConfiguration = LogConfiguration.Builder()
+    let fieldsConfiguration = CollectingFieldsConfiguration.Builder()
                                .set(shouldLogDeviceCourse: false)
                                .build()
-    let configuration = Configuration(url: url, headers: headers, logConfiguration: logConfiguration)
+    let configuration = Configuration(url: url, headers: headers, collectingFieldsConfiguration: fieldsConfiguration)
 ```
 
 ## Communication

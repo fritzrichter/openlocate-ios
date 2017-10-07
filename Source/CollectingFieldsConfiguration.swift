@@ -1,5 +1,5 @@
 //
-//  LogConfiguration.swift
+//  CollectingFieldsConfiguration.swift
 //
 //  Copyright (c) 2017 OpenLocate
 //
@@ -22,8 +22,8 @@
 //  SOFTWARE.
 //
 
-/// Configuration which describes all data which is sending from the device
-public struct LogConfiguration {
+/// Describes which data is sending from the device
+public struct CollectingFieldsConfiguration {
     /// Determines whether network information is sending or not. Default value is true.
     public let shouldLogNetworkInfo: Bool
 
@@ -34,14 +34,14 @@ public struct LogConfiguration {
     public let shouldLogDeviceSpeed: Bool
 
     /// Default configuration. All parameters are set to true.
-    public static let `default` = LogConfiguration(
+    public static let `default` = CollectingFieldsConfiguration(
         shouldLogNetworkInfo: true,
         shouldLogDeviceCourse: true,
         shouldLogDeviceSpeed: true
     )
 }
 
-public extension LogConfiguration {
+public extension CollectingFieldsConfiguration {
     final public class Builder {
         private var shouldLogNetworkInfo = true
         private var shouldLogDeviceCourse = true
@@ -67,8 +67,8 @@ public extension LogConfiguration {
             return self
         }
 
-        public func build() -> LogConfiguration {
-            return LogConfiguration(shouldLogNetworkInfo: shouldLogNetworkInfo,
+        public func build() -> CollectingFieldsConfiguration {
+            return CollectingFieldsConfiguration(shouldLogNetworkInfo: shouldLogNetworkInfo,
                                     shouldLogDeviceCourse: shouldLogDeviceCourse,
                                     shouldLogDeviceSpeed: shouldLogDeviceSpeed)
         }

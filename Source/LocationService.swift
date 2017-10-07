@@ -40,7 +40,7 @@ final class LocationService: LocationServiceType {
 
     let isStartedKey = "OpenLocate_isStarted"
 
-    let logConfiguration: LogConfiguration
+    let collectingFieldsConfiguration: CollectingFieldsConfiguration
 
     var transmissionInterval: TimeInterval
 
@@ -66,7 +66,7 @@ final class LocationService: LocationServiceType {
         advertisingInfo: AdvertisingInfo,
         locationManager: LocationManagerType,
         transmissionInterval: TimeInterval,
-        logConfiguration: LogConfiguration) {
+        logConfiguration: CollectingFieldsConfiguration) {
 
         httpClient = postable
         self.locationDataSource = locationDataSource
@@ -75,7 +75,7 @@ final class LocationService: LocationServiceType {
         self.url = url
         self.headers = headers
         self.transmissionInterval = transmissionInterval
-        self.logConfiguration = logConfiguration
+        self.collectingFieldsConfiguration = logConfiguration
     }
 
     func start() {
@@ -84,13 +84,13 @@ final class LocationService: LocationServiceType {
         locationManager.subscribe { locations in
 
             let openLocateLocations: [OpenLocateLocation] = locations.map {
-                let info = OpenLocateInfo.Builder(logConfiguration: self.logConfiguration)
+                let info = CollectingFields.Builder(configuration: self.collectingFieldsConfiguration)
                     .set(location: $0.location)
                     .set(network: NetworkInfo.currentNetworkInfo())
                     .build()
                 return OpenLocateLocation(location: $0.location,
                                           advertisingInfo: self.advertisingInfo,
-                                          openLocateInfo: info,
+                                          collectingFields: info,
                                           context: $0.context)
             }
 

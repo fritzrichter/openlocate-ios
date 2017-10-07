@@ -42,7 +42,7 @@ final class OpenLocateLocationTests: BaseTestCase {
         let adInfo = AdvertisingInfo.Builder().set(advertisingId: "2345").set(isLimitedAdTrackingEnabled: true).build()
         let networkInfo = NetworkInfo(bssid: "bssid_goes_here", ssid: "ssid_goes_here")
 
-        let info = OpenLocateInfo.Builder(logConfiguration: .default)
+        let info = CollectingFields.Builder(configuration: .default)
             .set(location: coreLocation)
             .set(network: networkInfo)
             .build()
@@ -50,7 +50,7 @@ final class OpenLocateLocationTests: BaseTestCase {
         //When
         let location = OpenLocateLocation(location: coreLocation,
                                           advertisingInfo: adInfo,
-                                          openLocateInfo: info,
+                                          collectingFields: info,
                                           context: .visitExit)
         let jsonDict = location.json as? JsonDictionary
         let json = jsonDict!

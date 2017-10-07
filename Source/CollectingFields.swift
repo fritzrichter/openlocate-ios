@@ -1,5 +1,5 @@
 //
-//  OpenLocateInfo.swift
+//  CollectingFields.swift
 //
 //  Copyright (c) 2017 OpenLocate
 //
@@ -22,23 +22,23 @@
 //  SOFTWARE.
 //
 
-import Foundation
 import CoreLocation.CLLocation
 
-struct OpenLocateInfo {
+/// Contains all fields configurable with CollectingFieldsConfiguration
+struct CollectingFields {
     let networkInfo: NetworkInfo
-    let deviceLocationInfo: DeviceLocationInfo
+    let locationFields: LocationCollectingFields
 }
 
-extension OpenLocateInfo {
+extension CollectingFields {
     final class Builder {
-        let logConfiguration: LogConfiguration
+        let configuration: CollectingFieldsConfiguration
 
         private var location: CLLocation?
         private var networkInfo: NetworkInfo = .currentNetworkInfo()
 
-        init(logConfiguration: LogConfiguration) {
-            self.logConfiguration = logConfiguration
+        init(configuration: CollectingFieldsConfiguration) {
+            self.configuration = configuration
         }
 
         func set(network: NetworkInfo) -> Builder {
@@ -53,14 +53,14 @@ extension OpenLocateInfo {
             return self
         }
 
-        func build() -> OpenLocateInfo {
-            let networkInfo = logConfiguration.shouldLogNetworkInfo ? self.networkInfo : NetworkInfo()
+        func build() -> CollectingFields {
+            let networkInfo = configuration.shouldLogNetworkInfo ? self.networkInfo : NetworkInfo()
 
-            let course = logConfiguration.shouldLogDeviceCourse ? self.location?.course : nil
-            let speed = logConfiguration.shouldLogDeviceSpeed ? self.location?.speed : nil
-            let deviceLocationInfo = DeviceLocationInfo(deviceCourse: course, deviceSpeed: speed)
+            let course = configuration.shouldLogDeviceCourse ? self.location?.course : nil
+            let speed = configuration.shouldLogDeviceSpeed ? self.location?.speed : nil
+            let deviceLocationInfo = LocationCollectingFields(course: course, speed: speed)
 
-            return OpenLocateInfo(networkInfo: networkInfo, deviceLocationInfo: deviceLocationInfo)
+            return CollectingFields(networkInfo: networkInfo, locationFields: deviceLocationInfo)
         }
     }
 }

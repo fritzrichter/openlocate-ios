@@ -79,8 +79,8 @@ public struct OpenLocateLocation: OpenLocateLocationType {
     let location: CLLocation
     let advertisingInfo: AdvertisingInfo
     let networkInfo: NetworkInfo
-    let deviceLocationInfo: DeviceLocationInfo
-    let deviceInfo: DeviceInfo
+    let locationFields: LocationCollectingFields
+    let deviceInfo: DeviceCollectingFields
     let context: Context
 
     var debugDescription: String {
@@ -89,14 +89,14 @@ public struct OpenLocateLocation: OpenLocateLocationType {
 
     init(location: CLLocation,
          advertisingInfo: AdvertisingInfo,
-         openLocateInfo: OpenLocateInfo,
+         collectingFields: CollectingFields,
          context: Context = .unknown) {
 
         self.location = location
         self.advertisingInfo = advertisingInfo
-        self.networkInfo = openLocateInfo.networkInfo
-        self.deviceLocationInfo = openLocateInfo.deviceLocationInfo
-        self.deviceInfo = openLocateInfo.deviceInfo
+        self.networkInfo = collectingFields.networkInfo
+        self.locationFields = collectingFields.locationFields
+        self.deviceInfo = collectingFields.deviceInfo
         self.context = context
     }
 }
@@ -113,8 +113,8 @@ extension OpenLocateLocation {
             Keys.horizontalAccuracy: location.horizontalAccuracy,
             Keys.wifiBssid: networkInfo.bssid ?? NSNull(),
             Keys.wifissid: networkInfo.ssid ?? NSNull(),
-            Keys.course: deviceLocationInfo.deviceCourse ?? NSNull(),
-            Keys.speed: deviceLocationInfo.deviceSpeed ?? NSNull(),
+            Keys.course: locationFields.course ?? NSNull(),
+            Keys.speed: locationFields.speed ?? NSNull(),
             Keys.isCharging: deviceInfo.isCharging ?? NSNull(),
             Keys.deviceModel: deviceInfo.deviceModel ?? NSNull(),
             Keys.locationContext: context.rawValue
@@ -123,9 +123,10 @@ extension OpenLocateLocation {
 }
 
 extension OpenLocateLocation {
-    init(data: Data) {
-        let unwrappedCoding = NSKeyedUnarchiver.unarchiveObject(with: data) as? Coding
-        let coding = unwrappedCoding!
+    init(data: Data) throws {
+        guard let coding = NSKeyedUnarchiver.unarchiveObject(with: data) as? Coding else {
+            throw OpenLocateLocationError.unarchivingCannotBeDone
+        }
 
         self.location = CLLocation(
             coordinate: CLLocationCoordinate2DMake(coding.latitude, coding.longitude),
@@ -143,8 +144,8 @@ extension OpenLocateLocation {
             .build()
 
         self.networkInfo = NetworkInfo(bssid: coding.bssid, ssid: coding.ssid)
-        self.deviceLocationInfo = DeviceLocationInfo(deviceCourse: coding.course, deviceSpeed: coding.speed)
-        self.deviceInfo = DeviceInfo(isCharging: coding.isCharging, deviceModel: coding.deviceModel)
+        self.locationFields = LocationCollectingFields(course: coding.course, speed: coding.speed)
+        self.deviceInfo = DeviceCollectingFields(isCharging: coding.isCharging, deviceModel: coding.deviceModel)
 
         if let contextString = coding.context, let context = Context(rawValue: contextString) {
             self.context = context
@@ -186,8 +187,8 @@ extension OpenLocateLocation {
             bssid = location.networkInfo.bssid
             ssid = location.networkInfo.ssid
             context = location.context.rawValue
-            course = location.deviceLocationInfo.deviceCourse
-            speed = location.deviceLocationInfo.deviceSpeed
+            course = location.locationFields.course
+            speed = location.locationFields.speed
             isCharging = location.deviceInfo.isCharging
             deviceModel = location.deviceInfo.deviceModel
         }

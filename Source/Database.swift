@@ -69,14 +69,15 @@ extension SQLiteDatabase {
             throw SQLiteError.open(message: "Error getting directory")
         }
 
-        let database = try open(path: url.appendingPathComponent(databaseName).path)
-        return database
+        return try open(path: url.appendingPathComponent(databaseName).path)
     }
 
     static func open(path: String) throws -> SQLiteDatabase {
         var db: OpaquePointer?
 
         if sqlite3_open(path, &db) == SQLITE_OK, let db = db {
+            setupDatabaseFileProtection(.none, atPath: path)
+
             return SQLiteDatabase(database: db)
         } else {
             let message: String
@@ -91,6 +92,15 @@ extension SQLiteDatabase {
             }
 
             throw SQLiteError.open(message: message)
+        }
+    }
+
+    private static func setupDatabaseFileProtection(_ protection: FileProtectionType, atPath path: String) {
+        do {
+            try FileManager.default.setAttributes([FileAttributeKey.protectionKey: protection],
+                                                  ofItemAtPath: path)
+        } catch {
+            debugPrint(error)
         }
     }
 

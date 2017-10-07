@@ -30,14 +30,14 @@ public struct Configuration {
 
     let url: URL
     let headers: Headers?
-    let logConfiguration: LogConfiguration
+    let collectingFieldsConfiguration: CollectingFieldsConfiguration
 
     public init(url: URL,
                 headers: Headers? = nil,
-                logConfiguration: LogConfiguration = .default) {
+                collectingFieldsConfiguration: CollectingFieldsConfiguration = .default) {
 
         self.url = url
         self.headers = headers
-        self.logConfiguration = logConfiguration
+        self.collectingFieldsConfiguration = collectingFieldsConfiguration
     }
 }

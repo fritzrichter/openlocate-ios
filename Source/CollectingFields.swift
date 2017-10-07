@@ -1,5 +1,5 @@
 //
-//  OpenLocateInfo.swift
+//  CollectingFields.swift
 //
 //  Copyright (c) 2017 OpenLocate
 //
@@ -22,25 +22,25 @@
 //  SOFTWARE.
 //
 
-import Foundation
 import CoreLocation.CLLocation
 
-struct OpenLocateInfo {
+/// Contains all fields configurable with CollectingFieldsConfiguration
+struct CollectingFields {
     let networkInfo: NetworkInfo
-    let deviceLocationInfo: DeviceLocationInfo
-    let deviceInfo: DeviceInfo
+    let locationFields: LocationCollectingFields
+    let deviceInfo: DeviceCollectingFields
 }
 
-extension OpenLocateInfo {
+extension CollectingFields {
     final class Builder {
-        let logConfiguration: LogConfiguration
+        let configuration: CollectingFieldsConfiguration
 
         private var location: CLLocation?
-        private var deviceInfo: DeviceInfo?
+        private var deviceInfo: DeviceCollectingFields?
         private var networkInfo: NetworkInfo = .currentNetworkInfo()
 
-        init(logConfiguration: LogConfiguration) {
-            self.logConfiguration = logConfiguration
+        init(configuration: CollectingFieldsConfiguration) {
+            self.configuration = configuration
         }
 
         func set(network: NetworkInfo) -> Builder {
@@ -55,24 +55,23 @@ extension OpenLocateInfo {
             return self
         }
 
-        func set(deviceInfo: DeviceInfo) -> Builder {
+        func set(deviceInfo: DeviceCollectingFields) -> Builder {
             self.deviceInfo = deviceInfo
 
             return self
         }
 
-        func build() -> OpenLocateInfo {
-            let networkInfo = logConfiguration.shouldLogNetworkInfo ? self.networkInfo : NetworkInfo()
+        func build() -> CollectingFields {
+            let networkInfo = configuration.shouldLogNetworkInfo ? self.networkInfo : NetworkInfo()
 
-            let course = logConfiguration.shouldLogDeviceCourse ? self.location?.course : nil
-            let speed = logConfiguration.shouldLogDeviceSpeed ? self.location?.speed : nil
-            let deviceLocationInfo = DeviceLocationInfo(deviceCourse: course, deviceSpeed: speed)
+            let course = configuration.shouldLogDeviceCourse ? self.location?.course : nil
+            let speed = configuration.shouldLogDeviceSpeed ? self.location?.speed : nil
+            let deviceLocationInfo = LocationCollectingFields(course: course, speed: speed)
+            let deviceInfo = self.deviceInfo ?? DeviceCollectingFields.configure(with: configuration)
 
-            let deviceInfo = self.deviceInfo ?? DeviceInfo.currentDeviceInfo(withLogConfiguration: logConfiguration)
-
-            return OpenLocateInfo(networkInfo: networkInfo,
-                                  deviceLocationInfo: deviceLocationInfo,
-                                  deviceInfo: deviceInfo)
+            return CollectingFields(networkInfo: networkInfo,
+                                    locationFields: deviceLocationInfo,
+                                    deviceInfo: deviceInfo)
         }
     }
 }

@@ -1,5 +1,5 @@
 //
-//  LogConfiguration.swift
+//  CollectingFieldsConfiguration.swift
 //
 //  Copyright (c) 2017 OpenLocate
 //
@@ -22,8 +22,8 @@
 //  SOFTWARE.
 //
 
-/// Configuration which describes all data which is sending from the device
-public struct LogConfiguration {
+/// Describes which data is sending from the device
+public struct CollectingFieldsConfiguration {
     /// Determines whether network information is sending or not. Default value is true.
     public var shouldLogNetworkInfo: Bool
 
@@ -40,11 +40,49 @@ public struct LogConfiguration {
     public var shouldLogDeviceModel: Bool
 
     /// Default configuration. All parameters are set to true.
-    public static let `default` = LogConfiguration(
+    public static let `default` = CollectingFieldsConfiguration(
         shouldLogNetworkInfo: true,
         shouldLogDeviceCourse: true,
         shouldLogDeviceSpeed: true,
         shouldLogDeviceCharging: true,
         shouldLogDeviceModel: true
     )
+}
+
+public extension CollectingFieldsConfiguration {
+    final public class Builder {
+        private var shouldLogNetworkInfo = true
+        private var shouldLogDeviceCourse = true
+        private var shouldLogDeviceSpeed = true
+        private var shouldLogDeviceCharging = true
+        private var shouldLogDeviceModel = true
+
+        public init() {}
+
+        public func set(shouldLogNetworkInfo: Bool) -> Builder {
+            self.shouldLogNetworkInfo = shouldLogNetworkInfo
+
+            return self
+        }
+
+        public func set(shouldLogDeviceCourse: Bool) -> Builder {
+            self.shouldLogDeviceCourse = shouldLogDeviceCourse
+
+            return self
+        }
+
+        public func set(shouldLogDeviceSpeed: Bool) -> Builder {
+            self.shouldLogDeviceSpeed = shouldLogDeviceSpeed
+
+            return self
+        }
+
+        public func build() -> CollectingFieldsConfiguration {
+            return CollectingFieldsConfiguration(shouldLogNetworkInfo: shouldLogNetworkInfo,
+                                    shouldLogDeviceCourse: shouldLogDeviceCourse,
+                                    shouldLogDeviceSpeed: shouldLogDeviceSpeed,
+                                    shouldLogDeviceCharging: shouldLogDeviceCharging,
+                                    shouldLogDeviceModel: shouldLogDeviceModel)
+        }
+    }
 }

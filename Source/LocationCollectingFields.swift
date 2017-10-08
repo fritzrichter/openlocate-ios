@@ -1,5 +1,5 @@
 //
-//  DeviceLocationInfo.swift
+//  LocationCollectingFields.swift
 //
 //  Copyright (c) 2017 OpenLocate
 //
@@ -22,9 +22,11 @@
 //  SOFTWARE.
 //
 
-import Foundation
+/// Location fields' values which are sending from device
+struct LocationCollectingFields {
+    /// Course of the location in degrees true North
+    let course: Double?
 
-struct DeviceLocationInfo {
-    let deviceCourse: Double?
-    let deviceSpeed: Double?
+    /// Speed of the location in m/s
+    let speed: Double?
 }

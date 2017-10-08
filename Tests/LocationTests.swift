@@ -41,9 +41,9 @@ final class OpenLocateLocationTests: BaseTestCase {
 
         let adInfo = AdvertisingInfo.Builder().set(advertisingId: "2345").set(isLimitedAdTrackingEnabled: true).build()
         let networkInfo = NetworkInfo(bssid: "bssid_goes_here", ssid: "ssid_goes_here")
-        let deviceInfo = DeviceInfo(isCharging: false, deviceModel: "iPhone 7 Plus", osVersion: "iOS 11.0.1")
+        let deviceInfo = DeviceCollectingFields(isCharging: false, deviceModel: "iPhone9,4", osVersion: "iOS 11.0.1")
 
-        let info = OpenLocateInfo.Builder(logConfiguration: .default)
+        let info = CollectingFields.Builder(configuration: .default)
             .set(location: coreLocation)
             .set(network: networkInfo)
             .set(deviceInfo: deviceInfo)
@@ -52,7 +52,7 @@ final class OpenLocateLocationTests: BaseTestCase {
         //When
         let location = OpenLocateLocation(location: coreLocation,
                                           advertisingInfo: adInfo,
-                                          openLocateInfo: info,
+                                          collectingFields: info,
                                           context: .visitExit)
         let jsonDict = location.json as? JsonDictionary
         let json = jsonDict!
@@ -73,5 +73,20 @@ final class OpenLocateLocationTests: BaseTestCase {
         XCTAssertEqual((json["device_model"] as? String)!, "iPhone 7 Plus")
         XCTAssertEqual((json["os_version"] as? String)!, "iOS 11.0.1")
         XCTAssertEqual((json["location_context"] as? String)!, "visit_exit")
+    }
+
+    func testInitMethodWithIncorrectData() {
+        // Given
+        let data = Data()
+
+        // Then
+        do {
+            _ = try OpenLocateLocation(data: data)
+        } catch OpenLocateLocationError.unarchivingCannotBeDone {
+
+        } catch {
+            XCTFail("Error is incorrect. Sholud be OpenLocateLocationError.unarchivingCannotBeDone")
+        }
+
     }
 }

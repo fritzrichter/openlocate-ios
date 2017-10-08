@@ -60,6 +60,7 @@ public extension CollectingFieldsConfiguration {
         private var shouldLogDeviceSpeed = true
         private var shouldLogDeviceCharging = true
         private var shouldLogDeviceModel = true
+        private var shouldLogDeviceOsVersion = true
 
         public init() {}
 
@@ -83,10 +84,11 @@ public extension CollectingFieldsConfiguration {
 
         public func build() -> CollectingFieldsConfiguration {
             return CollectingFieldsConfiguration(shouldLogNetworkInfo: shouldLogNetworkInfo,
-                                    shouldLogDeviceCourse: shouldLogDeviceCourse,
-                                    shouldLogDeviceSpeed: shouldLogDeviceSpeed,
-                                    shouldLogDeviceCharging: shouldLogDeviceCharging,
-                                    shouldLogDeviceModel: shouldLogDeviceModel)
+                                                 shouldLogDeviceCourse: shouldLogDeviceCourse,
+                                                 shouldLogDeviceSpeed: shouldLogDeviceSpeed,
+                                                 shouldLogDeviceCharging: shouldLogDeviceCharging,
+                                                 shouldLogDeviceModel: shouldLogDeviceModel,
+                                                 shouldLogDeviceOsVersion: shouldLogDeviceOsVersion)
         }
     }
 }

@@ -147,7 +147,9 @@ extension OpenLocateLocation {
 
         self.networkInfo = NetworkInfo(bssid: coding.bssid, ssid: coding.ssid)
         self.locationFields = LocationCollectingFields(course: coding.course, speed: coding.speed)
-        self.deviceInfo = DeviceCollectingFields(isCharging: coding.isCharging, deviceModel: coding.deviceModel, osVersion: coding.osVersion)
+        self.deviceInfo = DeviceCollectingFields(isCharging: coding.isCharging,
+                                                 deviceModel: coding.deviceModel,
+                                                 osVersion: coding.osVersion)
 
         if let contextString = coding.context, let context = Context(rawValue: contextString) {
             self.context = context

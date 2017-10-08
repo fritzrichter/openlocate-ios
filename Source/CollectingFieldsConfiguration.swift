@@ -82,6 +82,24 @@ public extension CollectingFieldsConfiguration {
             return self
         }
 
+        public func set(shouldLogDeviceCharging: Bool) -> Builder {
+            self.shouldLogDeviceCharging = shouldLogDeviceCharging
+
+            return self
+        }
+
+        public func set(shouldLogDeviceModel: Bool) -> Builder {
+            self.shouldLogDeviceModel = shouldLogDeviceModel
+
+            return self
+        }
+
+        public func set(shouldLogDeviceOsVersion: Bool) -> Builder {
+            self.shouldLogDeviceOsVersion = shouldLogDeviceOsVersion
+
+            return self
+        }
+
         public func build() -> CollectingFieldsConfiguration {
             return CollectingFieldsConfiguration(shouldLogNetworkInfo: shouldLogNetworkInfo,
                                                  shouldLogDeviceCourse: shouldLogDeviceCourse,

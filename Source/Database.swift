@@ -32,9 +32,8 @@ enum SQLiteError: Error {
     case bind(message: String)
 }
 
-private let databaseName = "safagraph.sqlite3"
-
 protocol Database {
+    @discardableResult
     func execute(statement: Statement) throws -> Result
     func begin()
     func commit()
@@ -42,7 +41,13 @@ protocol Database {
 }
 
 final class SQLiteDatabase: Database {
+    fileprivate enum Constants {
+        static let databaseName = "safagraph.sqlite3"
+        static let databaseQueue = "safagraph.sqlite3.queue"
+    }
+
     private let sqliteTransient = unsafeBitCast(-1, to:sqlite3_destructor_type.self)
+    private let queue = DispatchQueue(label: Constants.databaseQueue, attributes: [])
 
     private let database: OpaquePointer
     private let fmt = DateFormatter()
@@ -69,7 +74,7 @@ extension SQLiteDatabase {
             throw SQLiteError.open(message: "Error getting directory")
         }
 
-        return try open(path: url.appendingPathComponent(databaseName).path)
+        return try open(path: url.appendingPathComponent(Constants.databaseName).path)
     }
 
     static func open(path: String) throws -> SQLiteDatabase {
@@ -156,12 +161,14 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
+    @discardableResult
     func execute(statement: Statement) throws -> Result {
         var preparedStatement = try prepareStatement(statement.statement)
         try bindParameter(&preparedStatement, args: statement.args)
 
         let result = SQLResult.Builder()
             .set(statement: preparedStatement)
+            .set(queue: queue)
             .build()
 
         if !statement.cached {

@@ -37,13 +37,16 @@ protocol Result {
 final class SQLResult: Result {
     let statement: OpaquePointer
 
+    private let queue: DispatchQueue?
+
     private lazy var columnCount: Int = Int(sqlite3_column_count(statement))
     private lazy var columnNames: [String] = (0..<CInt(columnCount)).map {
         String(cString: sqlite3_column_name(statement, $0))
     }
 
-    init(statement: OpaquePointer) {
+    fileprivate init(statement: OpaquePointer, queue: DispatchQueue?) {
         self.statement = statement
+        self.queue = queue
     }
 
     deinit {
@@ -55,14 +58,22 @@ extension SQLResult {
 
     final class Builder {
         var statement: OpaquePointer?
+        var queue: DispatchQueue?
 
         func set(statement: OpaquePointer?) -> Builder {
             self.statement = statement
+
+            return self
+        }
+
+        func set(queue: DispatchQueue?) -> Builder {
+            self.queue = queue
+
             return self
         }
 
         func build() -> SQLResult {
-            return SQLResult(statement: statement!)
+            return SQLResult(statement: statement!, queue: queue)
         }
     }
 }
@@ -107,7 +118,13 @@ extension SQLResult {
     }
 
     private func step() -> CInt {
-        return sqlite3_step(statement)
+        guard let queue = queue else {
+            return sqlite3_step(statement)
+        }
+
+        return queue.sync { () -> CInt in
+            sqlite3_step(statement)
+        }
     }
 
     var code: CInt {

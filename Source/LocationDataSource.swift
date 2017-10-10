@@ -41,7 +41,7 @@ protocol LocationDataSourceType {
 
 final class LocationDatabase: LocationDataSourceType {
 
-    private struct Constants {
+    private enum Constants {
         static let tableName = "Location"
         static let columnId = "_id"
         static let columnLocation = "location"
@@ -60,7 +60,7 @@ final class LocationDatabase: LocationDataSourceType {
             .set(args: [location.data])
             .build()
 
-        _ = try database.execute(statement: statement)
+        try database.execute(statement: statement)
     }
 
     func addAll(locations: [OpenLocateLocationType]) {
@@ -118,7 +118,7 @@ final class LocationDatabase: LocationDataSourceType {
             .build()
 
         do {
-            _ = try database.execute(statement: statement)
+            try database.execute(statement: statement)
         } catch let error {
             debugPrint(error.localizedDescription)
         }
@@ -195,7 +195,7 @@ final class LocationDatabase: LocationDataSourceType {
         .build()
 
         do {
-            _ = try database.execute(statement: statement)
+            try database.execute(statement: statement)
         } catch let error {
             debugPrint(error.localizedDescription)
         }

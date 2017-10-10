@@ -43,4 +43,38 @@ class DatabaseTests: BaseTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+
+    func testReadFromBD() {
+        let query = "SELECT COUNT(*) FROM Location"
+
+        let statement = SQLStatement.Builder()
+            .set(query: query)
+            .set(cached: true)
+            .build()
+
+        do {
+            let database = try SQLiteDatabase.testDB()
+            let result = try database.execute(statement: statement)
+            XCTAssertEqual(Int(result.intValue(column: 0)), 0)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+
+    func testReadFromBDFailure() {
+        let query = "SELECT COUNT(*) FROM Location1"
+
+        let statement = SQLStatement.Builder()
+            .set(query: query)
+            .set(cached: true)
+            .build()
+
+        do {
+            let database = try SQLiteDatabase.testDB()
+            _ = try database.execute(statement: statement)
+            XCTFail("Cannot be good. No such table in db")
+        } catch {
+            XCTAssertNotNil(error)
+        }
+    }
 }

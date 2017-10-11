@@ -43,11 +43,17 @@ protocol Database {
 final class SQLiteDatabase: Database {
     fileprivate enum Constants {
         static let databaseName = "safagraph.sqlite3"
-        static let databaseQueue = "safagraph.sqlite3.queue"
+    }
+
+    fileprivate enum Queue {
+        static let connectionQueue = "safagraph.sqlite3.connectionQueue"
+        static let executionQueue = "safagraph.sqlite3.executionQueue"
     }
 
     private let sqliteTransient = unsafeBitCast(-1, to:sqlite3_destructor_type.self)
-    private let queue = DispatchQueue(label: Constants.databaseQueue, attributes: [])
+
+    private let connectionQueue = DispatchQueue(label: Queue.connectionQueue, attributes: [])
+    private let executionQueue = DispatchQueue(label: Queue.executionQueue, attributes: [])
 
     private let database: OpaquePointer
     private let fmt = DateFormatter()
@@ -168,7 +174,8 @@ extension SQLiteDatabase {
 
         let result = SQLResult.Builder()
             .set(statement: preparedStatement)
-            .set(queue: queue)
+            .set(connectionQueue: connectionQueue)
+            .set(executeQueue: executionQueue)
             .build()
 
         if !statement.cached {

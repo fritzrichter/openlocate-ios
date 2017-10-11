@@ -37,16 +37,18 @@ protocol Result {
 final class SQLResult: Result {
     let statement: OpaquePointer
 
-    private let queue: DispatchQueue?
+    private let connectionQueue: DispatchQueue?
+    private let executeQueue: DispatchQueue?
 
     private lazy var columnCount: Int = Int(sqlite3_column_count(statement))
     private lazy var columnNames: [String] = (0..<CInt(columnCount)).map {
         String(cString: sqlite3_column_name(statement, $0))
     }
 
-    fileprivate init(statement: OpaquePointer, queue: DispatchQueue?) {
+    fileprivate init(statement: OpaquePointer, connectionQueue: DispatchQueue?, executeQueue: DispatchQueue?) {
         self.statement = statement
-        self.queue = queue
+        self.connectionQueue = connectionQueue
+        self.executeQueue = executeQueue
     }
 
     deinit {
@@ -58,7 +60,8 @@ extension SQLResult {
 
     final class Builder {
         var statement: OpaquePointer?
-        var queue: DispatchQueue?
+        var connectionQueue: DispatchQueue?
+        var executeQueue: DispatchQueue?
 
         func set(statement: OpaquePointer?) -> Builder {
             self.statement = statement
@@ -66,14 +69,20 @@ extension SQLResult {
             return self
         }
 
-        func set(queue: DispatchQueue?) -> Builder {
-            self.queue = queue
+        func set(connectionQueue: DispatchQueue?) -> Builder {
+            self.connectionQueue = connectionQueue
+
+            return self
+        }
+
+        func set(executeQueue: DispatchQueue?) -> Builder {
+            self.executeQueue = executeQueue
 
             return self
         }
 
         func build() -> SQLResult {
-            return SQLResult(statement: statement!, queue: queue)
+            return SQLResult(statement: statement!, connectionQueue: connectionQueue, executeQueue: executeQueue)
         }
     }
 }
@@ -113,18 +122,17 @@ extension SQLResult {
     }
 
     func reset() -> Bool {
-        let result = sqlite3_reset(statement)
+        let result = sync { () -> Int32 in
+            sqlite3_reset(statement)
+        }
+
         return result == SQLITE_DONE || result == SQLITE_OK
     }
 
     private func step() -> CInt {
-        guard let queue = queue else {
-            return sqlite3_step(statement)
-        }
-
-        return queue.sync { () -> CInt in
+        return sync({ () -> CInt in
             sqlite3_step(statement)
-        }
+        })
     }
 
     var code: CInt {
@@ -132,5 +140,37 @@ extension SQLResult {
         _ = reset()
 
         return resultCode
+    }
+
+    private func sync<T>(_ block: () throws -> T) rethrows -> T {
+        guard let queue = connectionQueue else {
+            return try block()
+        }
+
+        return try queue.sync(execute: block)
+    }
+
+    private func async<T>(_ block: @escaping () throws -> T,
+                          _ resultBlock: @escaping (T) -> Void,
+                          _ errorBlock: @escaping (Error) -> Void) {
+        guard let queue = executeQueue else {
+            performThrowableBlock(block, resultBlock, errorBlock)
+
+            return
+        }
+
+        queue.async {
+            self.performThrowableBlock(block, resultBlock, errorBlock)
+        }
+    }
+
+    private func performThrowableBlock<T>(_ block: @escaping () throws -> T,
+                                          _ resultBlock: @escaping (T) -> Void,
+                                          _ errorBlock: @escaping (Error) -> Void) {
+        do {
+            resultBlock(try block())
+        } catch {
+            errorBlock(error)
+        }
     }
 }

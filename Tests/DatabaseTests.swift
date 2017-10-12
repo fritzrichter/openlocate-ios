@@ -26,6 +26,24 @@ import XCTest
 @testable import OpenLocate
 
 class DatabaseTests: BaseTestCase {
+    private func createTableIfNotExists(in database: SQLiteDatabase, completion: @escaping ExecuteCompletion) {
+        let query = "CREATE TABLE IF NOT EXISTS " +
+            "Location (" +
+            "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            "location BLOB NOT NULL" +
+        ");"
+
+        let statement = SQLStatement.Builder()
+            .set(query: query)
+            .build()
+
+        do {
+            try database.execute(statement: statement, completion: completion)
+        } catch let error {
+            debugPrint(error.localizedDescription)
+        }
+    }
+
     func testTestDBCreation() {
         do {
             let database = try SQLiteDatabase.testDB()
@@ -52,10 +70,32 @@ class DatabaseTests: BaseTestCase {
             .set(cached: true)
             .build()
 
+        let expectation = self.expectation(description: "Reading from DB")
+
         do {
             let database = try SQLiteDatabase.testDB()
-            let result = try database.execute(statement: statement)
-            XCTAssertEqual(Int(result.intValue(column: 0)), 0)
+            createTableIfNotExists(in: database) { _, _ in
+                do {
+                    try database.execute(statement: statement, completion: { result, error in
+                        guard error == nil else {
+                            XCTFail(error!.localizedDescription)
+
+                            return
+                        }
+                        XCTAssertEqual(Int(result.intValue(column: 0)), 0)
+
+                        expectation.fulfill()
+                    })
+                } catch {
+                    XCTFail(error.localizedDescription)
+                }
+            }
+
+            waitForExpectations(timeout: 0.5, handler: { error in
+                if let error = error {
+                    XCTFail(error.localizedDescription)
+                }
+            })
         } catch {
             XCTFail(error.localizedDescription)
         }
@@ -69,12 +109,21 @@ class DatabaseTests: BaseTestCase {
             .set(cached: true)
             .build()
 
+        let expectation = self.expectation(description: "Reading from DB which does not exist")
+
         do {
             let database = try SQLiteDatabase.testDB()
-            _ = try database.execute(statement: statement)
-            XCTFail("Cannot be good. No such table in db")
+            try database.execute(statement: statement) { _, error in
+                XCTAssertNotNil(error)
+
+                expectation.fulfill()
+            }
         } catch {
             XCTAssertNotNil(error)
+
+            expectation.fulfill()
         }
+
+        wait(for: [expectation], timeout: 0.5)
     }
 }

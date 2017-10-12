@@ -96,8 +96,6 @@ final class LocationService: LocationServiceType {
 
             self.locationDataSource.addAll(locations: openLocateLocations)
 
-            debugPrint(self.locationDataSource.count)
-
             self.postAllLocationsIfNeeded()
         }
 
@@ -114,25 +112,36 @@ final class LocationService: LocationServiceType {
 
 extension LocationService {
 
-    private func postAllLocationsIfNeeded() {
-        if let earliestIndexedLocation = locationDataSource.first() {
-            do {
-                let earliestLocation = try OpenLocateLocation(data: earliestIndexedLocation.1.data)
-                if abs(earliestLocation.location.timestamp.timeIntervalSinceNow) > self.transmissionInterval {
-                    postAllLocations()
-                }
-            } catch {
-                debugPrint(error)
+    private func postAllLocations(fromLocation location: IndexLocation) {
+        do {
+            let earliestLocation = try OpenLocateLocation(data: location.data)
+            if abs(earliestLocation.location.timestamp.timeIntervalSinceNow) > self.transmissionInterval {
+                postAllLocations()
             }
+        } catch {
+            debugPrint(error)
+        }
+    }
+
+    private func postAllLocationsIfNeeded() {
+        locationDataSource.first { [weak self] location in
+            guard let location = location else { return }
+
+            self?.postAllLocations(fromLocation: location)
         }
     }
 
     private func postAllLocations() {
-        let indexedLocations = locationDataSource.all()
-        if indexedLocations.isEmpty == false {
-            locationDataSource.clear()
-            let locations = indexedLocations.map { $1 }
-            self.postLocations(locations: locations)
+        locationDataSource.all { [weak self] locations in
+            guard !locations.isEmpty else { return }
+
+            self?.locationDataSource.clear()
+            do {
+                let openLocateLocations = try locations.map { try OpenLocateLocation(data: $0.data) }
+                self?.postLocations(locations: openLocateLocations)
+            } catch {
+                debugPrint(error)
+            }
         }
     }
 

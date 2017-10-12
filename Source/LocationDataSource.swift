@@ -26,15 +26,20 @@ import Foundation
 
 typealias IndexedLocation = (Int, OpenLocateLocationType)
 
+struct IndexLocation {
+    let index: Int
+    let data: Data
+}
+
 protocol LocationDataSourceType {
 
-    var count: Int { get }
+    func count(completion: @escaping (Int) -> Void)
 
     func add(location: OpenLocateLocationType) throws
     func addAll(locations: [OpenLocateLocationType])
 
-    func first() -> IndexedLocation?
-    func all() -> [IndexedLocation]
+    func first(completion: @escaping (IndexLocation?) -> Void)
+    func all(completion: @escaping ([IndexLocation]) -> Void)
 
     func clear()
 }
@@ -60,13 +65,11 @@ final class LocationDatabase: LocationDataSourceType {
             .set(args: [location.data])
             .build()
 
-        try database.execute(statement: statement)
+        try database.execute(statement: statement, completion: nil)
     }
 
     func addAll(locations: [OpenLocateLocationType]) {
-        if locations.isEmpty {
-            return
-        }
+        guard !locations.isEmpty else { return }
 
         if locations.count == 1 {
             do {
@@ -74,6 +77,7 @@ final class LocationDatabase: LocationDataSourceType {
             } catch let error {
                 debugPrint(error.localizedDescription)
             }
+
             return
         }
 
@@ -84,13 +88,15 @@ final class LocationDatabase: LocationDataSourceType {
             } catch let error {
                 debugPrint(error.localizedDescription)
                 database.rollback()
+
                 return
             }
         }
+
         database.commit()
     }
 
-    var count: Int {
+    func count(completion: @escaping (Int) -> Void) {
         let query = "SELECT COUNT(*) FROM \(Constants.tableName)"
 
         let statement = SQLStatement.Builder()
@@ -100,14 +106,22 @@ final class LocationDatabase: LocationDataSourceType {
 
         var count = -1
         do {
-            let result = try database.execute(statement: statement)
-            _ = result.next()
-            count = Int(result.intValue(column: 0))
+            try database.execute(statement: statement, completion: { result, error in
+                guard error == nil else {
+                    debugPrint(error!)
 
-            return count
+                    return
+                }
+
+                result.next { _ in
+                    count = Int(result.intValue(column: 0))
+
+                    completion(count)
+                }
+            })
         } catch let error {
             debugPrint(error.localizedDescription)
-            return count
+            completion(count)
         }
     }
 
@@ -118,13 +132,13 @@ final class LocationDatabase: LocationDataSourceType {
             .build()
 
         do {
-            try database.execute(statement: statement)
+            try database.execute(statement: statement, completion: nil)
         } catch let error {
             debugPrint(error.localizedDescription)
         }
     }
 
-    func first() -> IndexedLocation? {
+    func first(completion: @escaping (IndexLocation?) -> Void) {
         let query = "SELECT * FROM \(Constants.tableName) LIMIT 1"
         let statement = SQLStatement.Builder()
             .set(query: query)
@@ -132,48 +146,78 @@ final class LocationDatabase: LocationDataSourceType {
             .build()
 
         do {
-            let result = try database.execute(statement: statement)
-            if result.next() {
-                let index = result.intValue(column: Constants.columnId)
-                let data = result.dataValue(column: Constants.columnLocation)
+            try database.execute(statement: statement, completion: { [weak self] result, error in
+                guard error == nil else {
+                    debugPrint(error!)
 
-                if let data = data {
-                    return (index, try OpenLocateLocation(data: data))
+                    return
                 }
-            }
+
+                result.next(block: { [weak self] hasAnotherRow in
+                    if hasAnotherRow {
+                        let location = self?.getLocations(fromResult: result).first
+                        completion(location)
+                    } else {
+                        completion(nil)
+                    }
+                })
+            })
         } catch let error {
             debugPrint(error.localizedDescription)
+            completion(nil)
         }
-
-        return nil
     }
 
-    func all() -> [IndexedLocation] {
+    func all(completion: @escaping ([IndexLocation]) -> Void) {
         let query = "SELECT * FROM \(Constants.tableName)"
         let statement = SQLStatement.Builder()
             .set(query: query)
             .set(cached: true)
             .build()
 
-        var locations = [IndexedLocation]()
-
         do {
-            let result = try database.execute(statement: statement)
+            try database.execute(statement: statement, completion: { [weak self] result, error in
+                guard error == nil else {
+                    debugPrint(error!)
 
-            while result.next() {
-                let index = result.intValue(column: Constants.columnId)
-                let data = result.dataValue(column: Constants.columnLocation)
-
-                if let data = data {
-                    locations.append(
-                        (index, try OpenLocateLocation(data: data))
-                    )
+                    return
                 }
-            }
 
+                let indexLocations: [IndexLocation] = []
+                self?.getAllRows(fromResult: result, locations: indexLocations, completion: completion)
+            })
         } catch let error {
             debugPrint(error.localizedDescription)
+
+            let locations: [IndexLocation] = []
+            completion(locations)
         }
+    }
+
+    private func getAllRows(fromResult result: Result,
+                            locations: [IndexLocation],
+                            completion: @escaping ([IndexLocation]) -> Void) {
+        var locations = locations
+        result.next { [weak self] hasAnotherRow in
+            guard let strongSelf = self else { return }
+
+            locations.append(contentsOf: strongSelf.getLocations(fromResult: result))
+
+            if hasAnotherRow {
+                strongSelf.getAllRows(fromResult: result, locations: locations, completion: completion)
+            } else {
+                completion(locations)
+            }
+        }
+    }
+
+    private func getLocations(fromResult result: Result) -> [IndexLocation] {
+        let index = result.intValue(column: Constants.columnId)
+        let data = result.dataValue(column: Constants.columnLocation)
+
+        var locations: [IndexLocation] = []
+
+        if let data = data { locations.append(IndexLocation(index: index, data: data)) }
 
         return locations
     }
@@ -183,7 +227,7 @@ final class LocationDatabase: LocationDataSourceType {
         createTableIfNotExists()
     }
 
-    private func createTableIfNotExists() {
+    private func createTableIfNotExists(completion: ExecuteCompletion? = nil) {
         let query = "CREATE TABLE IF NOT EXISTS " +
         "\(Constants.tableName) (" +
         "\(Constants.columnId) INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -195,7 +239,7 @@ final class LocationDatabase: LocationDataSourceType {
         .build()
 
         do {
-            try database.execute(statement: statement)
+            try database.execute(statement: statement, completion: completion)
         } catch let error {
             debugPrint(error.localizedDescription)
         }
@@ -206,12 +250,12 @@ final class LocationList: LocationDataSourceType {
 
     private var locations: [OpenLocateLocationType]
 
-    var count: Int {
-        return self.locations.count
-    }
-
     init() {
         self.locations = [OpenLocateLocationType]()
+    }
+
+    func count(completion: @escaping (Int) -> Void) {
+        completion(locations.count)
     }
 
     func add(location: OpenLocateLocationType) {
@@ -222,19 +266,17 @@ final class LocationList: LocationDataSourceType {
         self.locations.append(contentsOf: locations)
     }
 
-    func first() -> IndexedLocation? {
+    func first(completion: @escaping (IndexLocation?) -> Void) {
         if let location = self.locations.first {
-            return (0, location)
+            completion(IndexLocation(index: 0, data: location.data))
+        } else {
+            completion(nil)
         }
-        return nil
     }
 
-    func all() -> [IndexedLocation] {
-        var locations = [IndexedLocation]()
-        self.locations.enumerated().forEach { indexedLocation in
-            locations.append(indexedLocation)
-        }
-        return locations
+    func all(completion: @escaping ([IndexLocation]) -> Void) {
+        let locations = self.locations.enumerated().map { IndexLocation(index: $0.offset, data: $0.element.data) }
+        completion(locations)
     }
 
     func clear() {

@@ -25,8 +25,10 @@
 import Foundation
 import SQLite3
 
+typealias NextBlockCompletion = (_ hasAnotherRow: Bool) -> Void
+
 protocol Result {
-    func next() -> Bool
+    func next(block: NextBlockCompletion?)
     func reset() -> Bool
 
     func intValue(column: Int) -> Int
@@ -117,10 +119,24 @@ extension SQLResult {
 
 extension SQLResult {
 
-    func next() -> Bool {
-        return step() == SQLITE_ROW
+    func next(block: NextBlockCompletion?) {
+        guard let queue = executeQueue else {
+            let hasAnotherRow = step() == SQLITE_ROW
+            block?(hasAnotherRow)
+
+            return
+        }
+
+        queue.async { [weak self] in
+            guard let strongSelf = self else { return }
+
+            let hasAnotherRow = strongSelf.step() == SQLITE_ROW
+
+            block?(hasAnotherRow)
+        }
     }
 
+    @discardableResult
     func reset() -> Bool {
         let result = sync { () -> Int32 in
             sqlite3_reset(statement)
@@ -135,11 +151,24 @@ extension SQLResult {
         })
     }
 
-    var code: CInt {
-        let resultCode = step()
-        _ = reset()
+    func code(block: @escaping (_ code: CInt) -> Void) {
+        guard let queue = executeQueue else {
+            let resultCode = step()
+            reset()
 
-        return resultCode
+            block(resultCode)
+
+            return
+        }
+
+        queue.async { [weak self] in
+            guard let strongSelf = self else { return }
+
+            let resultCode = strongSelf.step()
+            strongSelf.reset()
+
+            block(resultCode)
+        }
     }
 
     private func sync<T>(_ block: () throws -> T) rethrows -> T {

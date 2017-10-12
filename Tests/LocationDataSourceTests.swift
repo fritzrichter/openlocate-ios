@@ -76,6 +76,8 @@ class LocationDataSourceTests: BaseTestCase {
             return
         }
 
+        let expectation = self.expectation(description: "Counting locations")
+
         // When
         do {
             try locations.add(location: testLocation)
@@ -85,7 +87,12 @@ class LocationDataSourceTests: BaseTestCase {
         }
 
         // Then
-        XCTAssertEqual(locations.count, 1)
+        locations.count { count in
+            XCTAssertEqual(count, 1)
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 0.5)
     }
 
     func testAddMultipleLocations() {
@@ -95,12 +102,19 @@ class LocationDataSourceTests: BaseTestCase {
             return
         }
 
+        let expectation = self.expectation(description: "Counting locations")
+
         // When
         let multiple = [testLocation, testLocation, testLocation]
         locations.addAll(locations: multiple)
 
         // Then
-        XCTAssertEqual(locations.count, 3)
+        locations.count { count in
+            XCTAssertEqual(count, 3)
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 0.5)
     }
 
     func testPopAllLocations() {
@@ -113,12 +127,22 @@ class LocationDataSourceTests: BaseTestCase {
         // When
         let multiple = [testLocation, testLocation, testLocation, testLocation]
         locations.addAll(locations: multiple)
-        let popped = locations.all()
-        locations.clear()
 
-        // Then
-        XCTAssertEqual(popped.count, 4)
-        XCTAssertEqual(locations.count, 0)
+        let expectation = self.expectation(description: "Retireving locations and counting them")
+
+        locations.all { popped in
+            locations.clear()
+
+            // Then
+            XCTAssertEqual(popped.count, 4)
+            locations.count(completion: { count in
+                XCTAssertEqual(count, 0)
+
+                expectation.fulfill()
+            })
+        }
+
+        wait(for: [expectation], timeout: 0.5)
     }
 
     func testFirstLocation() {
@@ -131,18 +155,27 @@ class LocationDataSourceTests: BaseTestCase {
         // When
         let multiple = [testLocation, testLocation, testLocation, testLocation]
         locations.addAll(locations: multiple)
-        let firstIndexedLocation = locations.first()
 
-        // Then
-        do {
-            let firstLocation = try OpenLocateLocation(data: firstIndexedLocation!.1.data)
-            XCTAssertEqual(firstLocation.location.coordinate.latitude, testLocation.location.coordinate.latitude)
-            XCTAssertEqual(firstLocation.location.coordinate.longitude, testLocation.location.coordinate.longitude)
-            XCTAssertEqual(firstLocation.location.timestamp.timeIntervalSince1970,
-                           testLocation.location.timestamp.timeIntervalSince1970, accuracy: 0.1)
-        } catch {
-            XCTFail(error.localizedDescription)
+        let expectation = self.expectation(description: "Retrieving location")
+
+        locations.first { location in
+            // Then
+            do {
+                let firstLocation = try OpenLocateLocation(data: location!.data)
+                XCTAssertEqual(firstLocation.location.coordinate.latitude,
+                               self.testLocation.location.coordinate.latitude)
+                XCTAssertEqual(firstLocation.location.coordinate.longitude,
+                               self.testLocation.location.coordinate.longitude)
+                XCTAssertEqual(firstLocation.location.timestamp.timeIntervalSince1970,
+                               self.testLocation.location.timestamp.timeIntervalSince1970, accuracy: 0.1)
+
+                expectation.fulfill()
+            } catch {
+                XCTFail(error.localizedDescription)
+            }
         }
+
+        wait(for: [expectation], timeout: 0.5)
     }
 }
 
@@ -191,6 +224,8 @@ class LocationListDataSource: BaseTestCase {
             return
         }
 
+        let expectation = self.expectation(description: "Adding location and counting it")
+
         // When
         do {
             try locations.add(location: testLocation)
@@ -199,8 +234,14 @@ class LocationListDataSource: BaseTestCase {
             XCTFail("Add Location error")
         }
 
-        // Then
-        XCTAssertEqual(locations.count, 1)
+        locations.count { count in
+            // Then
+            XCTAssertEqual(count, 1)
+
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 0.5)
     }
 
     func testAddMultipleLocations() {
@@ -210,12 +251,19 @@ class LocationListDataSource: BaseTestCase {
             return
         }
 
+        let expectation = self.expectation(description: "Adding locations and count them")
+
         // When
         let multiple = [testLocation, testLocation, testLocation]
         locations.addAll(locations: multiple)
 
-        // Then
-        XCTAssertEqual(locations.count, 3)
+        locations.count { count in
+            // Then
+            XCTAssertEqual(count, 3)
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 0.5)
     }
 
     func testPopLocations() {
@@ -228,12 +276,21 @@ class LocationListDataSource: BaseTestCase {
         // When
         let multiple = [testLocation, testLocation, testLocation, testLocation]
         locations.addAll(locations: multiple)
-        let popped = locations.all()
-        locations.clear()
 
-        // Then
-        XCTAssertEqual(popped.count, 4)
-        XCTAssertEqual(locations.count, 0)
+        let expectation = self.expectation(description: "Retireving locations and counting them")
+
+        locations.all { popped in
+            locations.clear()
+
+            // Then
+            XCTAssertEqual(popped.count, 4)
+            locations.count(completion: { count in
+                XCTAssertEqual(count, 0)
+                expectation.fulfill()
+            })
+        }
+
+        wait(for: [expectation], timeout: 0.5)
     }
 
     func testFirstLocation() {
@@ -246,19 +303,34 @@ class LocationListDataSource: BaseTestCase {
         // When
         let multiple = [testLocation, testLocation, testLocation, testLocation]
         locations.addAll(locations: multiple)
-        let firstIndexedLocation = locations.first()
 
-        // Then
-        do {
-            let firstLocation = try OpenLocateLocation(data: firstIndexedLocation!.1.data)
-            XCTAssertEqual(firstLocation.location.coordinate.latitude, testLocation.location.coordinate.latitude)
-            XCTAssertEqual(firstLocation.location.coordinate.longitude, testLocation.location.coordinate.longitude)
-            XCTAssertEqual(firstLocation.locationFields.course, testLocation.location.course)
-            XCTAssertEqual(firstLocation.locationFields.speed, testLocation.location.speed)
-            XCTAssertEqual(firstLocation.location.timestamp.timeIntervalSince1970,
-            testLocation.location.timestamp.timeIntervalSince1970, accuracy: 0.1)
-        } catch {
-            XCTFail(error.localizedDescription)
+        let expectation = self.expectation(description: "Retireving location")
+
+        locations.first { location in
+            guard let location = location else {
+                XCTFail("Location cannot be nil")
+
+                return
+            }
+
+            // Then
+            do {
+                let firstLocation = try OpenLocateLocation(data: location.data)
+                XCTAssertEqual(firstLocation.location.coordinate.latitude,
+                               self.testLocation.location.coordinate.latitude)
+                XCTAssertEqual(firstLocation.location.coordinate.longitude,
+                               self.testLocation.location.coordinate.longitude)
+                XCTAssertEqual(firstLocation.locationFields.course, self.testLocation.location.course)
+                XCTAssertEqual(firstLocation.locationFields.speed, self.testLocation.location.speed)
+                XCTAssertEqual(firstLocation.location.timestamp.timeIntervalSince1970,
+                               self.testLocation.location.timestamp.timeIntervalSince1970, accuracy: 0.1)
+
+                expectation.fulfill()
+            } catch {
+                XCTFail(error.localizedDescription)
+            }
         }
+
+        wait(for: [expectation], timeout: 0.5)
     }
 }

@@ -33,8 +33,7 @@ enum SQLiteError: Error {
 }
 
 protocol Database {
-    @discardableResult
-    func execute(statement: Statement) throws -> Result
+    func execute(statement: Statement, completion: ExecuteCompletion?) throws
     func begin()
     func commit()
     func rollback()
@@ -166,11 +165,17 @@ extension SQLiteDatabase {
     }
 }
 
+typealias ExecuteCompletion = (_ result: Result, _ error: Error?) -> Void
+
 extension SQLiteDatabase {
-    @discardableResult
-    func execute(statement: Statement) throws -> Result {
-        var preparedStatement = try prepareStatement(statement.statement)
-        try bindParameter(&preparedStatement, args: statement.args)
+    func execute(statement: Statement, completion: ExecuteCompletion?) throws {
+        var preparedStatement = try connectionQueue.sync { () -> OpaquePointer in
+            try prepareStatement(statement.statement)
+        }
+
+        try connectionQueue.sync(execute: { () -> Void in
+            try bindParameter(&preparedStatement, args: statement.args)
+        })
 
         let result = SQLResult.Builder()
             .set(statement: preparedStatement)
@@ -179,11 +184,17 @@ extension SQLiteDatabase {
             .build()
 
         if !statement.cached {
-            let code = result.code
-            try checkResult(code)
+            result.code { [weak self] (code) in
+                do {
+                    try self?.checkResult(code)
+                    completion?(result, nil)
+                } catch {
+                    completion?(result, error)
+                }
+            }
+        } else {
+            completion?(result, nil)
         }
-
-        return result
     }
 
     private func checkResult(_ code: CInt) throws {
@@ -207,7 +218,7 @@ extension SQLiteDatabase {
         .set(query: query)
         .build()
 
-        _ = try? execute(statement: statement)
+        try? execute(statement: statement, completion: nil)
     }
 
     func commit() {
@@ -216,7 +227,7 @@ extension SQLiteDatabase {
             .set(query: query)
             .build()
 
-        _ = try? execute(statement: statement)
+        try? execute(statement: statement, completion: nil)
     }
 
     func rollback() {
@@ -225,6 +236,6 @@ extension SQLiteDatabase {
             .set(query: query)
             .build()
 
-        _ = try? execute(statement: statement)
+        try? execute(statement: statement, completion: nil)
     }
 }

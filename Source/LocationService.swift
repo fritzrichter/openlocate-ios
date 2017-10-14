@@ -117,7 +117,7 @@ extension LocationService {
     private func postAllLocations(fromLocation location: IndexLocation) {
         do {
             let earliestLocation = try OpenLocateLocation(data: location.data)
-            if abs(earliestLocation.location.timestamp.timeIntervalSinceNow) > self.transmissionInterval {
+            if abs(earliestLocation.timestamp.timeIntervalSinceNow) > self.transmissionInterval {
                 postAllLocations()
             }
         } catch {

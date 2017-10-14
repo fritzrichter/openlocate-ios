@@ -113,9 +113,18 @@ extension OpenLocate {
 
     private var advertisingInfo: AdvertisingInfo {
         let manager = ASIdentifierManager.shared()
+
+        var advertisingId: String?
+        var isLimitedAdTrackingEnabled: Bool?
+
+        if let shouldLogAdId = configuration?.collectingFieldsConfiguration.shouldLogAdId, shouldLogAdId {
+            advertisingId = manager.advertisingIdentifier.uuidString
+            isLimitedAdTrackingEnabled = manager.isAdvertisingTrackingEnabled
+        }
+
         let advertisingInfo = AdvertisingInfo.Builder()
-            .set(advertisingId: manager.advertisingIdentifier.uuidString)
-            .set(isLimitedAdTrackingEnabled: manager.isAdvertisingTrackingEnabled)
+            .set(advertisingId: advertisingId)
+            .set(isLimitedAdTrackingEnabled: isLimitedAdTrackingEnabled)
             .build()
 
         return advertisingInfo
@@ -141,9 +150,10 @@ extension OpenLocate {
         let fieldsContainer = CollectingFields.Builder(configuration: fieldsConfiguration)
             .set(location: location)
             .set(network: NetworkInfo.currentNetworkInfo())
+            .set(deviceInfo: DeviceCollectingFields.configure(with: fieldsConfiguration))
             .build()
 
-        let openlocateLocation = OpenLocateLocation(location: location,
+        let openlocateLocation = OpenLocateLocation(timestamp: location.timestamp,
                                                     advertisingInfo: advertisingInfo,
                                                     collectingFields: fieldsContainer)
         completion(openlocateLocation, nil)

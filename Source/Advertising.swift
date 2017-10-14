@@ -25,10 +25,10 @@
 import Foundation
 
 struct AdvertisingInfo {
-    let advertisingId: String
-    let isLimitedAdTrackingEnabled: Bool
+    let advertisingId: String?
+    let isLimitedAdTrackingEnabled: Bool?
 
-    private init(advertisingId: String, isLimitedAdTrackingEnabled: Bool) {
+    private init(advertisingId: String?, isLimitedAdTrackingEnabled: Bool?) {
         self.advertisingId = advertisingId
         self.isLimitedAdTrackingEnabled = isLimitedAdTrackingEnabled
     }
@@ -36,16 +36,18 @@ struct AdvertisingInfo {
 
 extension AdvertisingInfo {
     final class Builder {
-        private var advertisingId = ""
-        private var isLimitedAdTrackingEnabled = false
+        private var advertisingId: String?
+        private var isLimitedAdTrackingEnabled: Bool?
 
-        func set(advertisingId: String) -> Builder {
+        func set(advertisingId: String?) -> Builder {
             self.advertisingId = advertisingId
+
             return self
         }
 
-        func set(isLimitedAdTrackingEnabled: Bool) -> Builder {
+        func set(isLimitedAdTrackingEnabled: Bool?) -> Builder {
             self.isLimitedAdTrackingEnabled = isLimitedAdTrackingEnabled
+
             return self
         }
 

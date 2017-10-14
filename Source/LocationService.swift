@@ -81,22 +81,25 @@ final class LocationService: LocationServiceType {
     func start() {
         debugPrint("Location service started for url : \(url)")
 
-        locationManager.subscribe { locations in
+        locationManager.subscribe { [weak self] locations in
+
+            guard let strongSelf = self else { return }
 
             let openLocateLocations: [OpenLocateLocation] = locations.map {
-                let info = CollectingFields.Builder(configuration: self.collectingFieldsConfiguration)
+                let info = CollectingFields.Builder(configuration: strongSelf.collectingFieldsConfiguration)
                     .set(location: $0.location)
                     .set(network: NetworkInfo.currentNetworkInfo())
+                    .set(deviceInfo: DeviceCollectingFields.configure(with: strongSelf.collectingFieldsConfiguration))
                     .build()
-                return OpenLocateLocation(location: $0.location,
-                                          advertisingInfo: self.advertisingInfo,
+                return OpenLocateLocation(timestamp: $0.location.timestamp,
+                                          advertisingInfo: strongSelf.advertisingInfo,
                                           collectingFields: info,
                                           context: $0.context)
             }
 
-            self.locationDataSource.addAll(locations: openLocateLocations)
+            strongSelf.locationDataSource.addAll(locations: openLocateLocations)
 
-            self.postAllLocationsIfNeeded()
+            strongSelf.postAllLocationsIfNeeded()
         }
 
         UserDefaults.standard.set(true, forKey: isStartedKey)
@@ -107,7 +110,6 @@ final class LocationService: LocationServiceType {
         UserDefaults.standard.set(false, forKey: isStartedKey)
         postAllLocations()
     }
-
 }
 
 extension LocationService {

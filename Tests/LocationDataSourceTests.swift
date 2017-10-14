@@ -46,14 +46,16 @@ class LocationDataSourceTests: BaseTestCase {
             .build()
 
         let networkInfo = NetworkInfo(bssid: "bssid_goes_here", ssid: "ssid_goes_here")
+        let deviceInfo = DeviceCollectingFields(isCharging: false, deviceModel: "iPhone9,4", osVersion: "iOS 11.0.1")
 
         let info = CollectingFields.Builder(configuration: .default)
             .set(location: coreLocation)
             .set(network: networkInfo)
+            .set(deviceInfo: deviceInfo)
             .build()
 
         return OpenLocateLocation(
-            location: coreLocation,
+            timestamp: coreLocation.timestamp,
             advertisingInfo: advertisingInfo,
             collectingFields: info
         )
@@ -199,14 +201,16 @@ class LocationListDataSource: BaseTestCase {
             .build()
 
         let networkInfo = NetworkInfo(bssid: "bssid_goes_here", ssid: "ssid_goes_here")
+        let deviceInfo = DeviceCollectingFields(isCharging: false, deviceModel: "iPhone9,4", osVersion: "iOS 11.0.1")
 
         let info = CollectingFields.Builder(configuration: .default)
             .set(location: coreLocation)
             .set(network: networkInfo)
+            .set(deviceInfo: deviceInfo)
             .build()
 
         return OpenLocateLocation(
-            location: coreLocation,
+            timestamp: coreLocation.timestamp,
             advertisingInfo: advertisingInfo,
             collectingFields: info
         )
@@ -316,14 +320,16 @@ class LocationListDataSource: BaseTestCase {
             // Then
             do {
                 let firstLocation = try OpenLocateLocation(data: location.data)
-                XCTAssertEqual(firstLocation.location.coordinate.latitude,
-                               self.testLocation.location.coordinate.latitude)
-                XCTAssertEqual(firstLocation.location.coordinate.longitude,
-                               self.testLocation.location.coordinate.longitude)
+                XCTAssertEqual(firstLocation.locationFields.coordinate.latitude,
+                               self.testLocation.locationFields.coordinate.latitude)
+                XCTAssertEqual(firstLocation.locationFields.coordinate.longitude,
+                               self.testLocation.locationFields.coordinate.longitude)
                 XCTAssertEqual(firstLocation.locationFields.course, self.testLocation.location.course)
                 XCTAssertEqual(firstLocation.locationFields.speed, self.testLocation.location.speed)
-                XCTAssertEqual(firstLocation.location.timestamp.timeIntervalSince1970,
-                               self.testLocation.location.timestamp.timeIntervalSince1970, accuracy: 0.1)
+                XCTAssertEqual(firstLocation.deviceInfo.isCharging, testLocation.deviceInfo.isCharging)
+                XCTAssertEqual(firstLocation.deviceInfo.deviceModel, testLocation.deviceInfo.deviceModel)
+                XCTAssertEqual(firstLocation.locationFields.timestamp!.timeIntervalSince1970,
+                               self.testLocation.locationFields.timestamp!.timeIntervalSince1970, accuracy: 0.1)
 
                 expectation.fulfill()
             } catch {

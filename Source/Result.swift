@@ -178,28 +178,4 @@ extension SQLResult {
 
         return try queue.sync(execute: block)
     }
-
-    private func async<T>(_ block: @escaping () throws -> T,
-                          _ resultBlock: @escaping (T) -> Void,
-                          _ errorBlock: @escaping (Error) -> Void) {
-        guard let queue = executeQueue else {
-            performThrowableBlock(block, resultBlock, errorBlock)
-
-            return
-        }
-
-        queue.async {
-            self.performThrowableBlock(block, resultBlock, errorBlock)
-        }
-    }
-
-    private func performThrowableBlock<T>(_ block: @escaping () throws -> T,
-                                          _ resultBlock: @escaping (T) -> Void,
-                                          _ errorBlock: @escaping (Error) -> Void) {
-        do {
-            resultBlock(try block())
-        } catch {
-            errorBlock(error)
-        }
-    }
 }

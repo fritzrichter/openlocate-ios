@@ -119,7 +119,7 @@ extension OpenLocate {
 
         if let shouldLogAdId = configuration?.collectingFieldsConfiguration.shouldLogAdId, shouldLogAdId {
             advertisingId = manager.advertisingIdentifier.uuidString
-            isLimitedAdTrackingEnabled = manager.isAdvertisingTrackingEnabled
+            isLimitedAdTrackingEnabled = !manager.isAdvertisingTrackingEnabled
         }
 
         let advertisingInfo = AdvertisingInfo.Builder()

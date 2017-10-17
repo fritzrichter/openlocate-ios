@@ -45,8 +45,8 @@ final class SQLiteDatabase: Database {
     }
 
     fileprivate enum Queue {
-        static let connectionQueue = "safagraph.sqlite3.connectionQueue"
-        static let executionQueue = "safagraph.sqlite3.executionQueue"
+        static let connectionQueue = "openlocate.sqlite3.connectionQueue"
+        static let executionQueue = "openlocate.sqlite3.executionQueue"
     }
 
     private let sqliteTransient = unsafeBitCast(-1, to:sqlite3_destructor_type.self)

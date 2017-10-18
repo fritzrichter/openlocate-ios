@@ -32,8 +32,6 @@ enum SQLiteError: Error {
     case bind(message: String)
 }
 
-private let databaseName = "openlocate.sqlite3"
-
 protocol Database {
     @discardableResult
     func execute(statement: Statement) throws -> Result
@@ -44,7 +42,8 @@ protocol Database {
 
 final class SQLiteDatabase: Database {
     fileprivate enum Constants {
-        static let databaseQueue = "safagraph.sqlite3.queue"
+        static let databaseName = "openlocate.sqlite3"
+        static let databaseQueue = "openlocate.sqlite3.queue"
     }
 
     private let sqliteTransient = unsafeBitCast(-1, to:sqlite3_destructor_type.self)
@@ -74,14 +73,14 @@ extension SQLiteDatabase {
 
             throw SQLiteError.open(message: "Error getting directory")
         }
-        
+
         let url = URL(fileURLWithPath: path).appendingPathComponent(bundleIdentifier, isDirectory: true)
-        
+
         try FileManager.default.createDirectory(at: url,
                                                 withIntermediateDirectories: true,
                                                 attributes: [FileAttributeKey.protectionKey: FileProtectionType.none])
-        
-        return try open(path: url.appendingPathComponent(databaseName, isDirectory: false).path)
+
+        return try open(path: url.appendingPathComponent(Constants.databaseName, isDirectory: false).path)
     }
 
     static func open(path: String) throws -> SQLiteDatabase {

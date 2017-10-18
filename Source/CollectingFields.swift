@@ -28,6 +28,15 @@ import CoreLocation.CLLocation
 struct CollectingFields {
     let networkInfo: NetworkInfo
     let locationFields: LocationCollectingFields
+    let deviceInfo: DeviceCollectingFields
+
+    private init(networkInfo: NetworkInfo,
+                 locationFields: LocationCollectingFields,
+                 deviceInfo: DeviceCollectingFields) {
+        self.networkInfo = networkInfo
+        self.locationFields = locationFields
+        self.deviceInfo = deviceInfo
+    }
 }
 
 extension CollectingFields {
@@ -35,6 +44,7 @@ extension CollectingFields {
         let configuration: CollectingFieldsConfiguration
 
         private var location: CLLocation?
+        private var deviceInfo: DeviceCollectingFields?
         private var networkInfo: NetworkInfo = .currentNetworkInfo()
 
         init(configuration: CollectingFieldsConfiguration) {
@@ -53,14 +63,37 @@ extension CollectingFields {
             return self
         }
 
+        func set(deviceInfo: DeviceCollectingFields) -> Builder {
+            self.deviceInfo = deviceInfo
+
+            return self
+        }
+
         func build() -> CollectingFields {
             let networkInfo = configuration.shouldLogNetworkInfo ? self.networkInfo : NetworkInfo()
 
             let course = configuration.shouldLogDeviceCourse ? self.location?.course : nil
             let speed = configuration.shouldLogDeviceSpeed ? self.location?.speed : nil
-            let deviceLocationInfo = LocationCollectingFields(course: course, speed: speed)
+            let coordinates = configuration.shouldLogLocation ? self.location?.coordinate : nil
+            let timestamp = configuration.shouldLogTimestamp ? self.location?.timestamp : nil
+            let horizontalAccuracy = configuration.shouldLogHorizontalAccuracy ? self.location?.horizontalAccuracy : nil
+            let verticalAccuracy = configuration.shouldLogVerticalAccuracy ? self.location?.verticalAccuracy : nil
+            let altitude = configuration.shouldLogAltitude ? self.location?.altitude : nil
 
-            return CollectingFields(networkInfo: networkInfo, locationFields: deviceLocationInfo)
+            let deviceLocationInfo
+                = LocationCollectingFields(course: course,
+                                           speed: speed,
+                                           coordinates: coordinates,
+                                           timestamp: timestamp,
+                                           horizontalAccuracy: horizontalAccuracy,
+                                           verticalAccuracy: verticalAccuracy,
+                                           altitude: altitude)
+
+            let deviceInfo = self.deviceInfo ?? DeviceCollectingFields.configure(with: configuration)
+
+            return CollectingFields(networkInfo: networkInfo,
+                                    locationFields: deviceLocationInfo,
+                                    deviceInfo: deviceInfo)
         }
     }
 }

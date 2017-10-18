@@ -31,7 +31,7 @@ OpenLocate is supported by mobile app developers, non-profit trade groups, acade
 
 ## Installation
 
-1. Cocoapods
+Cocoapods
 
 If you use cocoapods, add the following line in your podfile and run `pod install`
 
@@ -130,9 +130,12 @@ The following fields are collected by the SDK to be sent to a private or public 
 7. `ad_opt_out` - Limited ad tracking enabled flag
 8. `course` - The direction in which the device is traveling
 9. `speed` - The instantaneous speed of the device, measured in meters per second
+10. `is_charging` - Indicates if device is charging
+11. `device_model` - Model of the user's device
+12. `os_version` - Version of the using OS on the device
 
 By default all these fields are collected. Naturally, you can choose what fields you'd like to collect. You just need to set configuration in such way.
-For example, you want to send information about network and device speed, but don't want device course. Than you should do so:
+For example, you want to send all information except device course. Than you should do so:
 
 ```swift
     let fieldsConfiguration = CollectingFieldsConfiguration.Builder()
@@ -143,7 +146,7 @@ For example, you want to send information about network and device speed, but do
 
 ## Communication
 
-- If you **need help**, use [Stack Overflow](https://stackoverflow.com). (Tag 'OpenLocate') 
+- If you **need help**, post a question to the [discussion forum](https://groups.google.com/a/openlocate.org/d/forum/openlocate), or tag a question with 'OpenLocate' on [Stack Overflow](https://stackoverflow.com).
 - If you **found a bug**, open an issue.
 - If you **have a feature request**, open an issue.
 - If you **want to contribute**, submit a pull request.

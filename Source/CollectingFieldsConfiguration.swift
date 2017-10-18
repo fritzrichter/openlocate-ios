@@ -33,44 +33,46 @@ public struct CollectingFieldsConfiguration {
     /// Determines whether device speed is sending or not. Default value is true.
     public let shouldLogDeviceSpeed: Bool
 
+    /// Determines whether device charging status should be sent ot not. Default value is true.
+    public let shouldLogDeviceCharging: Bool
+
+    /// Determines whether device model should be sent. Default value is true.
+    public let shouldLogDeviceModel: Bool
+
+    /// Determines whether device's os version is sent. Default value is true.
+    public let shouldLogDeviceOsVersion: Bool
+
+    /// Determines whether device's location coordinates will be sent. Default value is true.
+    public let shouldLogLocation: Bool
+
+    /// Determines whether timestamp of the recorded location in epoch will be sent. Default value is true.
+    public let shouldLogTimestamp: Bool
+
+    /// Determines whether accuracy of the location will be sent. Default value is true.
+    public let shouldLogHorizontalAccuracy: Bool
+
+    /// Determines whether altitude accuracy will be sent. Default value is true.
+    public let shouldLogVerticalAccuracy: Bool
+
+    /// Determines whether altitude will be sent. Default value is true.
+    public let shouldLogAltitude: Bool
+
+    /// Determines whether 'idfa' for identifying Apple device advertising type will be sent. Default value is true.
+    public let shouldLogAdId: Bool
+
     /// Default configuration. All parameters are set to true.
     public static let `default` = CollectingFieldsConfiguration(
         shouldLogNetworkInfo: true,
         shouldLogDeviceCourse: true,
-        shouldLogDeviceSpeed: true
+        shouldLogDeviceSpeed: true,
+        shouldLogDeviceCharging: true,
+        shouldLogDeviceModel: true,
+        shouldLogDeviceOsVersion: true,
+        shouldLogLocation: true,
+        shouldLogTimestamp: true,
+        shouldLogHorizontalAccuracy: true,
+        shouldLogVerticalAccuracy: true,
+        shouldLogAltitude: true,
+        shouldLogAdId: true
     )
-}
-
-public extension CollectingFieldsConfiguration {
-    final public class Builder {
-        private var shouldLogNetworkInfo = true
-        private var shouldLogDeviceCourse = true
-        private var shouldLogDeviceSpeed = true
-
-        public init() {}
-
-        public func set(shouldLogNetworkInfo: Bool) -> Builder {
-            self.shouldLogNetworkInfo = shouldLogNetworkInfo
-
-            return self
-        }
-
-        public func set(shouldLogDeviceCourse: Bool) -> Builder {
-            self.shouldLogDeviceCourse = shouldLogDeviceCourse
-
-            return self
-        }
-
-        public func set(shouldLogDeviceSpeed: Bool) -> Builder {
-            self.shouldLogDeviceSpeed = shouldLogDeviceSpeed
-
-            return self
-        }
-
-        public func build() -> CollectingFieldsConfiguration {
-            return CollectingFieldsConfiguration(shouldLogNetworkInfo: shouldLogNetworkInfo,
-                                    shouldLogDeviceCourse: shouldLogDeviceCourse,
-                                    shouldLogDeviceSpeed: shouldLogDeviceSpeed)
-        }
-    }
 }

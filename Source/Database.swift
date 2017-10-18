@@ -32,6 +32,8 @@ enum SQLiteError: Error {
     case bind(message: String)
 }
 
+private let databaseName = "openlocate.sqlite3"
+
 protocol Database {
     @discardableResult
     func execute(statement: Statement) throws -> Result
@@ -42,7 +44,6 @@ protocol Database {
 
 final class SQLiteDatabase: Database {
     fileprivate enum Constants {
-        static let databaseName = "safagraph.sqlite3"
         static let databaseQueue = "safagraph.sqlite3.queue"
     }
 
@@ -68,21 +69,25 @@ final class SQLiteDatabase: Database {
 extension SQLiteDatabase {
 
     static func openLocateDatabase() throws -> SQLiteDatabase {
-        guard let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first,
-            let url = URL(string: path) else {
+        guard let path = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true).first,
+            let bundleIdentifier = Bundle(for: OpenLocate.self).bundleIdentifier else {
 
             throw SQLiteError.open(message: "Error getting directory")
         }
-
-        return try open(path: url.appendingPathComponent(Constants.databaseName).path)
+        
+        let url = URL(fileURLWithPath: path).appendingPathComponent(bundleIdentifier, isDirectory: true)
+        
+        try FileManager.default.createDirectory(at: url,
+                                                withIntermediateDirectories: true,
+                                                attributes: [FileAttributeKey.protectionKey: FileProtectionType.none])
+        
+        return try open(path: url.appendingPathComponent(databaseName, isDirectory: false).path)
     }
 
     static func open(path: String) throws -> SQLiteDatabase {
         var db: OpaquePointer?
 
         if sqlite3_open(path, &db) == SQLITE_OK, let db = db {
-            setupDatabaseFileProtection(.none, atPath: path)
-
             return SQLiteDatabase(database: db)
         } else {
             let message: String
@@ -97,15 +102,6 @@ extension SQLiteDatabase {
             }
 
             throw SQLiteError.open(message: message)
-        }
-    }
-
-    private static func setupDatabaseFileProtection(_ protection: FileProtectionType, atPath path: String) {
-        do {
-            try FileManager.default.setAttributes([FileAttributeKey.protectionKey: protection],
-                                                  ofItemAtPath: path)
-        } catch {
-            debugPrint(error)
         }
     }
 

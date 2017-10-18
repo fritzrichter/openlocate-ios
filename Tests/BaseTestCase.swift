@@ -27,7 +27,7 @@ import XCTest
 
 extension SQLiteDatabase {
     static func testDB() throws -> SQLiteDatabase {
-        guard let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first else {
+        guard let path = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true).first else {
             throw SQLiteError.open(message: "Error getting directory")
         }
 

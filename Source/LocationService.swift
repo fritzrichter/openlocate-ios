@@ -168,10 +168,11 @@ extension LocationService {
             },
                 failure: { [weak self] _, error in
                     self?.asyncQueue.async {
-                        debugPrint("failure in posting locations!!! Error: \(error)")
                         self?.locationDataSource.addAll(locations: locations)
-                        self?.endBackgroundTask()
                     }
+
+                    self?.endBackgroundTask()
+                    debugPrint("failure in posting locations!!! Error: \(error)")
             }
             )
         } catch let error {

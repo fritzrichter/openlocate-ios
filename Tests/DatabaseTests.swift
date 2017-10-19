@@ -26,6 +26,24 @@ import XCTest
 @testable import OpenLocate
 
 class DatabaseTests: BaseTestCase {
+    private func createTableIfNotExists(in database: SQLiteDatabase) {
+        let query = "CREATE TABLE IF NOT EXISTS " +
+            "Location (" +
+            "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            "location BLOB NOT NULL" +
+        ");"
+
+        let statement = SQLStatement.Builder()
+            .set(query: query)
+            .build()
+
+        do {
+            try database.execute(statement: statement)
+        } catch let error {
+            debugPrint(error.localizedDescription)
+        }
+    }
+
     func testTestDBCreation() {
         do {
             let database = try SQLiteDatabase.testDB()
@@ -54,6 +72,7 @@ class DatabaseTests: BaseTestCase {
 
         do {
             let database = try SQLiteDatabase.testDB()
+            createTableIfNotExists(in: database)
             let result = try database.execute(statement: statement)
             XCTAssertEqual(Int(result.intValue(column: 0)), 0)
         } catch {

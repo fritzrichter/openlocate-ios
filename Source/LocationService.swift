@@ -56,7 +56,7 @@ final class LocationService: LocationServiceType {
     private var url: String
     private var headers: Headers?
 
-    private let asyncQueue: DispatchQueue = DispatchQueue(label: "openlocate.queue.async")
+    private let executionQueue: DispatchQueue = DispatchQueue(label: "openlocate.queue.async", qos: .background)
 
     var backgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
 
@@ -84,7 +84,7 @@ final class LocationService: LocationServiceType {
         debugPrint("Location service started for url : \(url)")
 
         locationManager.subscribe { [weak self] locations in
-            self?.asyncQueue.async {
+            self?.executionQueue.async {
                 guard let strongSelf = self else { return }
 
                 let collectingFields = DeviceCollectingFields.configure(with: strongSelf.collectingFieldsConfiguration)
@@ -167,7 +167,7 @@ extension LocationService {
                     self?.endBackgroundTask()
             },
                 failure: { [weak self] _, error in
-                    self?.asyncQueue.async {
+                    self?.executionQueue.async {
                         self?.locationDataSource.addAll(locations: locations)
                     }
 

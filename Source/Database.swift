@@ -105,29 +105,33 @@ extension SQLiteDatabase {
     }
 
     private func prepareStatement(_ sql: String) throws -> OpaquePointer {
-        var statement: OpaquePointer?
-        guard sqlite3_prepare_v2(database, sql, -1, &statement, nil) == SQLITE_OK,
-            let preparedStatement = statement else {
-            throw SQLiteError.prepare(message: errorMessage)
-        }
+        return try queue.sync { () -> OpaquePointer in
+            var statement: OpaquePointer?
+            guard sqlite3_prepare_v2(database, sql, -1, &statement, nil) == SQLITE_OK,
+                let preparedStatement = statement else {
+                    throw SQLiteError.prepare(message: errorMessage)
+            }
 
-        return preparedStatement
+            return preparedStatement
+        }
     }
 
     private func bindParameter(_ statement: inout OpaquePointer, args: StatementArgs) throws {
-        let queryCount = sqlite3_bind_parameter_count(statement)
+        try queue.sync(execute: { () -> Void in
+            let queryCount = sqlite3_bind_parameter_count(statement)
 
-        if queryCount != args.count {
-            throw SQLiteError.bind(message: errorMessage)
-        }
+            if queryCount != args.count {
+                throw SQLiteError.bind(message: errorMessage)
+            }
 
-        args.enumerated().forEach { index, object in
-            _ = bindObject(
-                object: object,
-                column: index + 1,
-                statement: &statement
-            )
-        }
+            args.enumerated().forEach { index, object in
+                _ = bindObject(
+                    object: object,
+                    column: index + 1,
+                    statement: &statement
+                )
+            }
+        })
     }
 
     private func bindObject(object: Any, column: Int, statement: inout OpaquePointer) -> CInt {

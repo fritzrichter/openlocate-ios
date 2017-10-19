@@ -50,7 +50,7 @@ final class SQLResult: Result {
     }
 
     deinit {
-        sqlite3_finalize(statement)
+        sync { sqlite3_finalize(statement) }
     }
 }
 
@@ -81,12 +81,9 @@ extension SQLResult {
 extension SQLResult {
 
     func intValue(column: Int) -> Int {
-        return Int(
-            sqlite3_column_int(
-                statement,
-                CInt(column)
-            )
-        )
+        return sync {
+            return Int(sqlite3_column_int(statement, CInt(column)))
+        }
     }
 
     func intValue(column: String) -> Int {
@@ -94,15 +91,17 @@ extension SQLResult {
     }
 
     func dataValue(column: String) -> Data? {
-        let index = CInt(columnNames.index(of: column)!)
+        return sync {
+            let index = CInt(columnNames.index(of: column)!)
 
-        let size = sqlite3_column_bytes(statement, index)
-        let buffer = sqlite3_column_blob(statement, index)
-        guard let buf = buffer else {
-            return nil
+            let size = sqlite3_column_bytes(statement, index)
+            let buffer = sqlite3_column_blob(statement, index)
+            guard let buf = buffer else {
+                return nil
+            }
+
+            return Data(bytes: buf, count: Int(size))
         }
-
-        return Data(bytes: buf, count: Int(size))
     }
 }
 
@@ -113,18 +112,14 @@ extension SQLResult {
     }
 
     func reset() -> Bool {
-        let result = sqlite3_reset(statement)
-        return result == SQLITE_DONE || result == SQLITE_OK
+        return sync {
+            let result = sqlite3_reset(statement)
+            return result == SQLITE_DONE || result == SQLITE_OK
+        }
     }
 
     private func step() -> CInt {
-        guard let queue = queue else {
-            return sqlite3_step(statement)
-        }
-
-        return queue.sync { () -> CInt in
-            sqlite3_step(statement)
-        }
+        return sync { sqlite3_step(statement) }
     }
 
     var code: CInt {
@@ -132,5 +127,18 @@ extension SQLResult {
         _ = reset()
 
         return resultCode
+    }
+}
+
+extension SQLResult {
+    @discardableResult
+    func sync<ReturnType>(block: () -> ReturnType) -> ReturnType {
+        guard let queue = queue else {
+            return block()
+        }
+
+        return queue.sync { () -> ReturnType in
+            block()
+        }
     }
 }

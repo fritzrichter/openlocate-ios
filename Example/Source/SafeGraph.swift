@@ -56,22 +56,29 @@ typealias SafePlacesCompletionHandler = ([SafeGraphPlace]?, Error?) -> Void
 
 enum SafeGraphError: Error {
     case placesNotFound
+    case locationNotFound
 }
 
 class SafeGraphStore {
     static let shared = SafeGraphStore()
 
     func fetchNearbyPlaces(location: OpenLocateLocation, completion: @escaping SafePlacesCompletionHandler) {
+        guard let coordinates = location.locationFields.coordinates else {
+            completion(nil, SafeGraphError.locationNotFound)
+            return
+        }
+
+        let queryParams = [
+            "advertising_id": location.advertisingInfo.advertisingId,
+            "advertising_id_type": "aaid",
+            "latitude": coordinates.latitude,
+            "longitude": coordinates.longitude,
+            "horizontal_accuracy": location.locationFields.horizontalAccuracy
+            ] as [String : Any]
 
         Alamofire.request(
             "https://api.safegraph.com/places/v1/nearby",
-            parameters: [
-                "advertising_id": location.advertisingId,
-                "advertising_id_type": location.advertisingIdType,
-                "latitude": location.latitude,
-                "longitude": location.longitude,
-                "horizontal_accuracy": location.horizontalAccuracy
-            ],
+            parameters: queryParams,
             headers: ["Authorization": "Bearer <YOUR_TOKEN>"]
         )
             .responseJSON { response in

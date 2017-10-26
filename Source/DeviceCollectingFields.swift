@@ -25,10 +25,10 @@
 import Foundation
 import UIKit.UIDevice
 
-struct DeviceCollectingFields {
-    let isCharging: Bool?
-    let deviceModel: String?
-    let osVersion: String?
+public struct DeviceCollectingFields {
+    public let isCharging: Bool?
+    public let deviceModel: String?
+    public let osVersion: String?
 
     static func configure(with configuration: CollectingFieldsConfiguration) -> DeviceCollectingFields {
         let currentDevice = UIDevice.current

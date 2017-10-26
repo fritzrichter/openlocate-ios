@@ -68,7 +68,7 @@ public struct OpenLocateLocation: OpenLocateLocationType {
         static let osVersion = "os_version"
     }
 
-    enum Context: String {
+    public enum Context: String {
         case unknown = "unknown"
         case passive = "passive"
         case regular = "regular"
@@ -79,12 +79,12 @@ public struct OpenLocateLocation: OpenLocateLocationType {
     private let idTypeValue = "idfa"
 
     // Save timestamp because it needs for detecting how much time did went since the first saved location.
-    let timestamp: Date
-    let advertisingInfo: AdvertisingInfo
-    let networkInfo: NetworkInfo
-    let locationFields: LocationCollectingFields
-    let deviceInfo: DeviceCollectingFields
-    let context: Context
+    public let timestamp: Date
+    public let advertisingInfo: AdvertisingInfo
+    public let networkInfo: NetworkInfo
+    public let locationFields: LocationCollectingFields
+    public let deviceInfo: DeviceCollectingFields
+    public let context: Context
 
     var debugDescription: String {
         return "OpenLocateLocation(location: \(locationFields), advertisingInfo: \(advertisingInfo))"

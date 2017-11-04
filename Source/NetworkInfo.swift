@@ -25,7 +25,7 @@
 import Foundation
 import SystemConfiguration.CaptiveNetwork
 
-struct NetworkInfo {
+public struct NetworkInfo {
 
     var bssid: String?
     var ssid: String?

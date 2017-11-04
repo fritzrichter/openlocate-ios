@@ -32,9 +32,8 @@ enum SQLiteError: Error {
     case bind(message: String)
 }
 
-private let databaseName = "safagraph.sqlite3"
-
 protocol Database {
+    @discardableResult
     func execute(statement: Statement) throws -> Result
     func begin()
     func commit()
@@ -42,7 +41,13 @@ protocol Database {
 }
 
 final class SQLiteDatabase: Database {
+    fileprivate enum Constants {
+        static let databaseName = "openlocate.sqlite3"
+        static let databaseQueue = "openlocate.sqlite3.queue"
+    }
+
     private let sqliteTransient = unsafeBitCast(-1, to:sqlite3_destructor_type.self)
+    private let queue = DispatchQueue(label: Constants.databaseQueue, attributes: [])
 
     private let database: OpaquePointer
     private let fmt = DateFormatter()
@@ -63,21 +68,26 @@ final class SQLiteDatabase: Database {
 extension SQLiteDatabase {
 
     static func openLocateDatabase() throws -> SQLiteDatabase {
-        guard let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first,
-            let url = URL(string: path) else {
+        guard let path = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true).first,
+            let bundleIdentifier = Bundle(for: OpenLocate.self).bundleIdentifier else {
 
             throw SQLiteError.open(message: "Error getting directory")
         }
 
-        return try open(path: url.appendingPathComponent(databaseName).path)
+        let url = URL(fileURLWithPath: path).appendingPathComponent(bundleIdentifier, isDirectory: true)
+
+        let attributes = [FileAttributeKey.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication]
+        try FileManager.default.createDirectory(at: url,
+                                                withIntermediateDirectories: true,
+                                                attributes: attributes)
+
+        return try open(path: url.appendingPathComponent(Constants.databaseName, isDirectory: false).path)
     }
 
     static func open(path: String) throws -> SQLiteDatabase {
         var db: OpaquePointer?
 
         if sqlite3_open(path, &db) == SQLITE_OK, let db = db {
-            setupDatabaseFileProtection(.none, atPath: path)
-
             return SQLiteDatabase(database: db)
         } else {
             let message: String
@@ -95,39 +105,34 @@ extension SQLiteDatabase {
         }
     }
 
-    private static func setupDatabaseFileProtection(_ protection: FileProtectionType, atPath path: String) {
-        do {
-            try FileManager.default.setAttributes([FileAttributeKey.protectionKey: protection],
-                                                  ofItemAtPath: path)
-        } catch {
-            debugPrint(error)
-        }
-    }
-
     private func prepareStatement(_ sql: String) throws -> OpaquePointer {
-        var statement: OpaquePointer?
-        guard sqlite3_prepare_v2(database, sql, -1, &statement, nil) == SQLITE_OK,
-            let preparedStatement = statement else {
-            throw SQLiteError.prepare(message: errorMessage)
-        }
+        return try queue.sync { () -> OpaquePointer in
+            var statement: OpaquePointer?
+            guard sqlite3_prepare_v2(database, sql, -1, &statement, nil) == SQLITE_OK,
+                let preparedStatement = statement else {
+                    throw SQLiteError.prepare(message: errorMessage)
+            }
 
-        return preparedStatement
+            return preparedStatement
+        }
     }
 
     private func bindParameter(_ statement: inout OpaquePointer, args: StatementArgs) throws {
-        let queryCount = sqlite3_bind_parameter_count(statement)
+        try queue.sync(execute: { () -> Void in
+            let queryCount = sqlite3_bind_parameter_count(statement)
 
-        if queryCount != args.count {
-            throw SQLiteError.bind(message: errorMessage)
-        }
+            if queryCount != args.count {
+                throw SQLiteError.bind(message: errorMessage)
+            }
 
-        args.enumerated().forEach { index, object in
-            _ = bindObject(
-                object: object,
-                column: index + 1,
-                statement: &statement
-            )
-        }
+            args.enumerated().forEach { index, object in
+                _ = bindObject(
+                    object: object,
+                    column: index + 1,
+                    statement: &statement
+                )
+            }
+        })
     }
 
     private func bindObject(object: Any, column: Int, statement: inout OpaquePointer) -> CInt {
@@ -156,12 +161,14 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
+    @discardableResult
     func execute(statement: Statement) throws -> Result {
         var preparedStatement = try prepareStatement(statement.statement)
         try bindParameter(&preparedStatement, args: statement.args)
 
         let result = SQLResult.Builder()
             .set(statement: preparedStatement)
+            .set(queue: queue)
             .build()
 
         if !statement.cached {

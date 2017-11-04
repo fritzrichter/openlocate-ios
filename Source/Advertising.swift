@@ -24,9 +24,9 @@
 
 import Foundation
 
-struct AdvertisingInfo {
-    let advertisingId: String?
-    let isLimitedAdTrackingEnabled: Bool?
+public struct AdvertisingInfo {
+    public let advertisingId: String?
+    public let isLimitedAdTrackingEnabled: Bool?
 
     private init(advertisingId: String?, isLimitedAdTrackingEnabled: Bool?) {
         self.advertisingId = advertisingId

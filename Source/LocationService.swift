@@ -58,6 +58,8 @@ final class LocationService: LocationServiceType {
     private var url: String
     private var headers: Headers?
 
+    private let executionQueue: DispatchQueue = DispatchQueue(label: "openlocate.queue.async", qos: .background)
+
     var backgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
 
     init(
@@ -84,26 +86,30 @@ final class LocationService: LocationServiceType {
         debugPrint("Location service started for url : \(url)")
 
         locationManager.subscribe { [weak self] locations in
+            self?.executionQueue.async {
+                guard let strongSelf = self else { return }
 
-            guard let strongSelf = self else { return }
+                let collectingFields = DeviceCollectingFields.configure(with: strongSelf.collectingFieldsConfiguration)
 
-            let openLocateLocations: [OpenLocateLocation] = locations.map {
-                let info = CollectingFields.Builder(configuration: strongSelf.collectingFieldsConfiguration)
-                    .set(location: $0.location)
-                    .set(network: NetworkInfo.currentNetworkInfo())
-                    .set(deviceInfo: DeviceCollectingFields.configure(with: strongSelf.collectingFieldsConfiguration))
-                    .build()
-                return OpenLocateLocation(timestamp: $0.location.timestamp,
-                                          advertisingInfo: strongSelf.advertisingInfo,
-                                          collectingFields: info,
-                                          context: $0.context)
+                let openLocateLocations: [OpenLocateLocation] = locations.map {
+                    let info = CollectingFields.Builder(configuration: strongSelf.collectingFieldsConfiguration)
+                        .set(location: $0.location)
+                        .set(network: NetworkInfo.currentNetworkInfo())
+                        .set(deviceInfo: collectingFields)
+                        .build()
+
+                    return OpenLocateLocation(timestamp: $0.location.timestamp,
+                                              advertisingInfo: strongSelf.advertisingInfo,
+                                              collectingFields: info,
+                                              context: $0.context)
+                }
+
+                strongSelf.locationDataSource.addAll(locations: openLocateLocations)
+
+                debugPrint(strongSelf.locationDataSource.count)
+
+                //strongSelf.postAllLocationsIfNeeded()
             }
-
-            strongSelf.locationDataSource.addAll(locations: openLocateLocations)
-
-            debugPrint(strongSelf.locationDataSource.count)
-
-            //strongSelf.postAllLocationsIfNeeded()
         }
 
         UserDefaults.standard.set(true, forKey: isStartedKey)
@@ -168,9 +174,12 @@ extension LocationService {
                     self?.endBackgroundTask()
             },
                 failure: { [weak self] _, error in
-                    debugPrint("failure in posting locations!!! Error: \(error)")
-                    self?.locationDataSource.addAll(locations: locations)
+                    self?.executionQueue.async {
+                        self?.locationDataSource.addAll(locations: locations)
+                    }
+
                     self?.endBackgroundTask()
+                    debugPrint("failure in posting locations!!! Error: \(error)")
             }
             )
         } catch let error {

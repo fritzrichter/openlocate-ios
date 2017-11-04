@@ -116,33 +116,184 @@ Call `isTrackingEnabled` method on the `OpenLocate`. Get the instance by calling
 OpenLocate.shared.isTrackingEnabled()
 ```
 
+### Using user's location to query 3rd party Places APIs
 
-### Fields collected by the SDK
+To use user's current location, obtain the location by calling `fetchCurrentLocation` method on OpenLocate. Get the instance by calling `shared`. Use the fields collected by SDK to send to 3rd party APIs.
 
-The following fields are collected by the SDK to be sent to a private or public API:
-
-1. `latitude` - Latitude of the device
-2. `longitude` - Longitude of the device
-3. `utc_timestamp` - Timestamp of the recorded location in epoch
-4. `horizontal_accuracy` - The accuracy of the location being recorded
-5. `id_type` - 'idfa' for identifying Apple device advertising type
-6. `ad_id` - Advertising identifier
-7. `ad_opt_out` - Limited ad tracking enabled flag
-8. `course` - The direction in which the device is traveling
-9. `speed` - The instantaneous speed of the device, measured in meters per second
-10. `is_charging` - Indicates if device is charging
-11. `device_model` - Model of the user's device
-12. `os_version` - Version of the using OS on the device
-
-By default all these fields are collected. Naturally, you can choose what fields you'd like to collect. You just need to set configuration in such way.
-For example, you want to send all information except device course. Than you should do so:
+#### For example, to obtain user location:
 
 ```swift
-    let fieldsConfiguration = CollectingFieldsConfiguration.Builder()
-                               .set(shouldLogDeviceCourse: false)
-                               .build()
-    let configuration = Configuration(url: url, headers: headers, collectingFieldsConfiguration: fieldsConfiguration)
+try OpenLocate.shared.fetchCurrentLocation { location, error in
+  if let location = location {
+    fetchNearbyPlaces(location: location)
+  } else {
+    debugPrint(error.localizedDescription)
+  }
+}
 ```
+
+#### For example, to query Google Places API using location:
+
+Google Places API: https://developers.google.com/places/web-service/search
+
+```swift
+
+func fetchNearbyPlaces(location: OpenLocateLocation, completion: @escaping GooglePlacesCompletionHandler) {
+        guard let coordinates = location.locationFields.coordinates else {
+            completion(nil, GooglePlacesError.locationNotFound)
+            return
+        }
+
+        let queryParams = [
+            "location": "\(coordinates.latitude),\(coordinates.longitude)",
+            "radius": "500",
+            "type": "restaurant",
+            "keyword": "south",
+            "key": "<YOUR GOOGLE PLACES API KEY>"
+            ] as [String : Any]
+
+        Alamofire.request(
+            "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
+            parameters: queryParams
+        )
+            .responseJSON { response in
+                debugPrint(response)
+                guard let json = response.result.value as? [String: Any],
+                    let placesJson = json["places"] as? [Any], !placesJson.isEmpty else {
+                    completion(nil, GooglePlacesError.placesNotFound)
+                    return
+                }
+
+                var places = [GooglePlace]()
+                for placeJson in placesJson {
+                    let place = (placeJson as? [String: Any])!
+                    places.append(GooglePlace(json: place))
+                }
+
+                completion(places, nil)
+        }
+    }
+
+```
+
+#### For example, to query Safegraph Places API using location:
+
+SafeGraph Places API: https://developers.safegraph.com/docs/places.html
+
+```swift
+
+func fetchNearbyPlaces(location: OpenLocateLocation, completion: @escaping SafePlacesCompletionHandler) {
+        guard let coordinates = location.locationFields.coordinates else {
+            completion(nil, SafeGraphError.locationNotFound)
+            return
+        }
+
+        let queryParams = [
+            "advertising_id": location.advertisingInfo.advertisingId,
+            "advertising_id_type": "aaid",
+            "latitude": coordinates.latitude,
+            "longitude": coordinates.longitude,
+            "horizontal_accuracy": location.locationFields.horizontalAccuracy
+            ] as [String : Any]
+
+        Alamofire.request(
+            "https://api.safegraph.com/places/v1/nearby",
+            parameters: queryParams,
+            headers: ["Authorization": "Bearer <YOUR_TOKEN>"]
+        )
+            .responseJSON { response in
+                debugPrint(response)
+                guard let json = response.result.value as? [String: Any],
+                    let placesJson = json["places"] as? [Any], !placesJson.isEmpty else {
+                    completion(nil, SafeGraphError.placesNotFound)
+                    return
+                }
+
+                var places = [SafeGraphPlace]()
+                for placeJson in placesJson {
+                    let place = (placeJson as? [String: Any])!
+                    places.append(SafeGraphPlace(json: place))
+                }
+
+                completion(places, nil)
+        }
+    }
+
+```
+
+Similarly, OpenLocate SDK can be used to query additional APIs such as Facebook Places Graph or any other 3rd party places API.
+
+- Facebook Places API - https://developers.facebook.com/docs/places/
+
+## Fields collected for request
+
+| Fields | Type | Description | Flag to enable |
+| ------ | ---- | ----------- | -------------- |
+|ad_id|String|An alphanumeric string unique to each device, used only for serving advertisements. More [here](https://developer.apple.com/documentation/adsupport/asidentifiermanager).|CollectingFieldsConfiguration.shouldLogAdId|
+|ad_opt_out|Boolean|A Boolean value that indicates whether the user has limited ad tracking. More [here](https://developer.apple.com/documentation/adsupport/asidentifiermanager).|CollectingFieldsConfiguration.shouldLogAdId|
+|id_type|String|A string value that indicates which operating systen advertising info belongs to. 'idfa' for iOS devices|CollectingFieldsConfiguration.shouldLogAdId|
+|latitude|Decimal|The latitude in degrees.|CollectingFieldsConfiguration.shouldLogLocation|
+|longitude|Decimal|The longitude in degrees.|CollectingFieldsConfiguration.shouldLogLocation|
+|utc_timestamp|Long|The time at which this location was determined.|CollectingFieldsConfiguration.shouldLogTimestamp|
+|horizontal_accuracy|Float|The radius of uncertainty for the location, measured in meters.|CollectingFieldsConfiguration.shouldLogHorizontalAccuracy|
+|veritcal_accuracy|Float|The accuracy of the altitude value, measured in meters.|CollectingFieldsConfiguration.shouldLogHorizontalAccuracy|
+|altitude|Float|The altitude, measured in meters.|CollectingFieldsConfiguration.shouldLogAltitude|
+|wifi_bssid|String|A string value representing the bssid of the wifi to which the device is connected to|CollectingFieldsConfiguration.shouldLogNetworkInfo|
+|wifi_ssid|String|A string value representing the ssis of the wifi to which the device is connected to|CollectingFieldsConfiguration.shouldLogNetworkInfo|
+|location_context|String|A string value representing the state of the location when it was collected. Possible value - `unknown`, `passive`, `regular`, `visit_entry`, `visit_exit`|CollectingFieldsConfiguration.shouldLogLocation|
+|course|Float|The direction in which the device is traveling.|CollectingFieldsConfiguration.shouldLogDeviceCourse|
+|speed|Float|The instantaneous speed of the device, measured in meters per second.|CollectingFieldsConfiguration.shouldLogDeviceSpeed|
+|is_charging|Boolean|A boolean value to determine if the phone was charging when the location was determined|CollectingFieldsConfiguration.shouldLogDeviceCharging|
+|device_model|String|A string value representing the model of the device|CollectingFieldsConfiguration.shouldLogDeviceModel|
+|os_version|String|A String value representing the version of the operating system|CollectingFieldsConfiguration.shouldLogDeviceOsVersion|
+
+### Sample Request Body
+
+This is a sample request body sent by the SDK. 
+```json
+[
+  {
+    "ad_id": "12a451dd-3539-4092-b134-8cb0ef62ab8a",
+    "ad_opt_out": true,
+    "id_type": "idfa",
+    "latitude": "37.773972",
+    "longitude": "-122.431297",
+    "utc_timestamp": "1508356559",
+    "horizontal_accuracy": 12.323,
+    "vertical_accuracy": 5.3,
+    "altitude": 0.456,
+    "wifi_ssid": "OpenLocate_Guest",
+    "wifi_bssid": "OpenLocate_Guest",
+    "location_context": "regular",
+    "course": 175.0,
+    "speed": 11.032,
+    "is_charging": true,
+    "device_model": "iPhone 7",
+    "os_version": "iOS 11.0.3"
+  },
+  {
+    "ad_id": "12a451dd-3539-4092-b134-8cb0ef62ab8a",
+    "ad_opt_out": true,
+    "id_type": "idfa",
+    "latitude": "37.773972",
+    "longitude": "-122.431297",
+    "utc_timestamp": "1508356559",
+    "horizontal_accuracy": 12.323,
+    "vertical_accuracy": 5.3,
+    "altitude": 0.456,
+    "wifi_ssid": "OpenLocate_Guest",
+    "wifi_bssid": "OpenLocate_Guest",
+    "location_context": "regular",
+    "course": 175.0,
+    "speed": 11.032,
+    "is_charging": true,
+    "device_model": "iPhone 7",
+    "os_version": "iOS 11.0.3"
+  }
+]
+```
+
+If you want to have the SDK send data to your own AWS s3 environment for example, look into setting up an [Kinesis firehose](https://aws.amazon.com/kinesis/firehose/) according to the SDK request above.
 
 ## Communication
 

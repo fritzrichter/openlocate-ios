@@ -25,25 +25,25 @@
 import CoreLocation.CLLocation
 
 /// Location fields' values which are sending from device
-struct LocationCollectingFields {
+public struct LocationCollectingFields {
     /// Course of the location in degrees true North
-    let course: Double?
+    public let course: Double?
 
     /// Speed of the location in m/s
-    let speed: Double?
+    public let speed: Double?
 
     /// The geographical coordinate information
-    let coordinates: CLLocationCoordinate2D?
+    public let coordinates: CLLocationCoordinate2D?
 
     /// The time at which this location was determined
-    let timestamp: Date?
+    public let timestamp: Date?
 
     /// The radius of uncertainty for the location, measured in meters
-    let horizontalAccuracy: CLLocationAccuracy?
+    public let horizontalAccuracy: CLLocationAccuracy?
 
     /// The accuracy of the altitude value, measured in meters
-    let verticalAccuracy: CLLocationAccuracy?
+    public let verticalAccuracy: CLLocationAccuracy?
 
     /// The altitude, measured in meters
-    let altitude: CLLocationDistance?
+    public let altitude: CLLocationDistance?
 }

@@ -37,17 +37,20 @@ protocol Result {
 final class SQLResult: Result {
     let statement: OpaquePointer
 
+    private let queue: DispatchQueue?
+
     private lazy var columnCount: Int = Int(sqlite3_column_count(statement))
     private lazy var columnNames: [String] = (0..<CInt(columnCount)).map {
         String(cString: sqlite3_column_name(statement, $0))
     }
 
-    init(statement: OpaquePointer) {
+    fileprivate init(statement: OpaquePointer, queue: DispatchQueue?) {
         self.statement = statement
+        self.queue = queue
     }
 
     deinit {
-        sqlite3_finalize(statement)
+        sync { sqlite3_finalize(statement) }
     }
 }
 
@@ -55,14 +58,22 @@ extension SQLResult {
 
     final class Builder {
         var statement: OpaquePointer?
+        var queue: DispatchQueue?
 
         func set(statement: OpaquePointer?) -> Builder {
             self.statement = statement
+
+            return self
+        }
+
+        func set(queue: DispatchQueue?) -> Builder {
+            self.queue = queue
+
             return self
         }
 
         func build() -> SQLResult {
-            return SQLResult(statement: statement!)
+            return SQLResult(statement: statement!, queue: queue)
         }
     }
 }
@@ -70,12 +81,9 @@ extension SQLResult {
 extension SQLResult {
 
     func intValue(column: Int) -> Int {
-        return Int(
-            sqlite3_column_int(
-                statement,
-                CInt(column)
-            )
-        )
+        return sync {
+            return Int(sqlite3_column_int(statement, CInt(column)))
+        }
     }
 
     func intValue(column: String) -> Int {
@@ -83,15 +91,17 @@ extension SQLResult {
     }
 
     func dataValue(column: String) -> Data? {
-        let index = CInt(columnNames.index(of: column)!)
+        return sync {
+            let index = CInt(columnNames.index(of: column)!)
 
-        let size = sqlite3_column_bytes(statement, index)
-        let buffer = sqlite3_column_blob(statement, index)
-        guard let buf = buffer else {
-            return nil
+            let size = sqlite3_column_bytes(statement, index)
+            let buffer = sqlite3_column_blob(statement, index)
+            guard let buf = buffer else {
+                return nil
+            }
+
+            return Data(bytes: buf, count: Int(size))
         }
-
-        return Data(bytes: buf, count: Int(size))
     }
 }
 
@@ -102,12 +112,14 @@ extension SQLResult {
     }
 
     func reset() -> Bool {
-        let result = sqlite3_reset(statement)
-        return result == SQLITE_DONE || result == SQLITE_OK
+        return sync {
+            let result = sqlite3_reset(statement)
+            return result == SQLITE_DONE || result == SQLITE_OK
+        }
     }
 
     private func step() -> CInt {
-        return sqlite3_step(statement)
+        return sync { sqlite3_step(statement) }
     }
 
     var code: CInt {
@@ -115,5 +127,18 @@ extension SQLResult {
         _ = reset()
 
         return resultCode
+    }
+}
+
+extension SQLResult {
+    @discardableResult
+    func sync<ReturnType>(block: () -> ReturnType) -> ReturnType {
+        guard let queue = queue else {
+            return block()
+        }
+
+        return queue.sync { () -> ReturnType in
+            block()
+        }
     }
 }

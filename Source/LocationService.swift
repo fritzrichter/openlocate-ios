@@ -32,6 +32,8 @@ protocol LocationServiceType {
 
     func start()
     func stop()
+    
+    func fetchLocation(onCompletion: @escaping ((Bool) -> Void))
 }
 
 private let locationsKey = "locations"
@@ -101,7 +103,7 @@ final class LocationService: LocationServiceType {
 
             debugPrint(strongSelf.locationDataSource.count)
 
-            strongSelf.postAllLocationsIfNeeded()
+            //strongSelf.postAllLocationsIfNeeded()
         }
 
         UserDefaults.standard.set(true, forKey: isStartedKey)
@@ -112,6 +114,11 @@ final class LocationService: LocationServiceType {
         UserDefaults.standard.set(false, forKey: isStartedKey)
         postAllLocations()
     }
+    
+    func fetchLocation(onCompletion: @escaping ((Bool) -> Void)) {
+        locationManager.fetchLocation(onCompletion: onCompletion)
+    }
+    
 }
 
 extension LocationService {

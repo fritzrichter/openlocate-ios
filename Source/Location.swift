@@ -74,6 +74,9 @@ public struct OpenLocateLocation: OpenLocateLocationType {
         case regular = "regular"
         case visitEntry = "visit_entry"
         case visitExit = "visit_exit"
+        case geofence_entry = "geofence_entry"
+        case geofence_exit = "geofence_exit"
+        case background_fetch = "background_fetch"
     }
 
     private let idTypeValue = "idfa"

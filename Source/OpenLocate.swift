@@ -93,6 +93,7 @@ extension OpenLocate {
 
     public func startTracking() {
         locationService?.start()
+        UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalMinimum)
     }
 
     public func stopTracking() {
@@ -103,6 +104,7 @@ extension OpenLocate {
         }
 
         service.stop()
+        UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalNever)
     }
 
     public var isTrackingEnabled: Bool {

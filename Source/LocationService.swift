@@ -106,19 +106,22 @@ final class LocationService: LocationServiceType {
 
                 strongSelf.locationDataSource.addAll(locations: openLocateLocations)
 
-                debugPrint(strongSelf.locationDataSource.count)
+                //debugPrint(strongSelf.locationDataSource.all())
 
-                //strongSelf.postAllLocationsIfNeeded()
+                strongSelf.postAllLocationsIfNeeded()
             }
         }
-
+        
         UserDefaults.standard.set(true, forKey: isStartedKey)
+        UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalMinimum)
     }
 
     func stop() {
         locationManager.cancel()
-        UserDefaults.standard.set(false, forKey: isStartedKey)
         postAllLocations()
+        
+        UserDefaults.standard.set(false, forKey: isStartedKey)
+        UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalNever)
     }
     
     func fetchLocation(onCompletion: @escaping ((Bool) -> Void)) {

@@ -86,7 +86,11 @@ class TrackViewController: UIViewController, CLLocationManagerDelegate {
 
     @IBAction func didTapAppSettingsButton() {
         if let appSettings = URL(string: UIApplicationOpenSettingsURLString) {
-            UIApplication.shared.open(appSettings, options: [:], completionHandler: nil)
+            if #available(iOS 10, *) {
+                UIApplication.shared.open(appSettings, options: [:], completionHandler: nil)
+            } else {
+                UIApplication.shared.openURL(appSettings)
+            }
         }
     }
 }

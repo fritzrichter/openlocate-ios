@@ -110,7 +110,7 @@ extension OpenLocate {
 
         return locationService.isStarted
     }
-    
+
     public func performFetchWithCompletionHandler(_ completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         guard let locationService = self.locationService, locationService.isStarted else {
             completionHandler(.noData)

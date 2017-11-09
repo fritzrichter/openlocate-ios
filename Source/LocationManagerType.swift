@@ -30,6 +30,11 @@ protocol CLLocationManagerType: class {
     /// The last location received. Will be nil until a location has been received.
     var location: CLLocation? { get }
 
+    var monitoredRegions: Set<CLRegion> { get }
+
+    /// The desired location accuracy. The location service will try its best to achieve your desired accuracy.
+    var desiredAccuracy: CLLocationAccuracy { get set }
+
     /// Determines whether the user has location services enabled.
     static func locationServicesEnabled() -> Bool
 
@@ -53,6 +58,12 @@ protocol CLLocationManagerType: class {
 
     /// Requests permission to use location services while the app is in the foreground.
     func requestWhenInUseAuthorization()
+
+    func requestLocation()
+
+    func startMonitoring(for region: CLRegion)
+
+    func stopMonitoring(for region: CLRegion)
 }
 
 extension CLLocationManager: CLLocationManagerType {}

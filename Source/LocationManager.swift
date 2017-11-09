@@ -35,20 +35,20 @@ protocol LocationManagerType {
 
     var updatingLocation: Bool { get }
     var lastLocation: CLLocation? { get }
-    
+
     func fetchLocation(onCompletion: @escaping ((Bool) -> Void))
 }
 
 final class LocationManager: NSObject, LocationManagerType, CLLocationManagerDelegate {
-    
+
     static let visitRegionIdentifier = "VisitRegion"
     static let minimumVisitRegionRadius = 25.0
 
-    private let manager: CLLocationManager
+    private let manager: CLLocationManagerType
     private var requests: [LocationsHandler] = []
     private var fetchLocationCompletionHandler: ((Bool) -> Void)?
 
-    required init(manager: CLLocationManager = CLLocationManager()) {
+    required init(manager: CLLocationManagerType = CLLocationManager()) {
         self.manager = manager
 
         super.init()
@@ -64,7 +64,7 @@ final class LocationManager: NSObject, LocationManagerType, CLLocationManagerDel
     static func locationServicesEnabled() -> Bool {
         return CLLocationManager.locationServicesEnabled()
     }
-    
+
     func fetchLocation(onCompletion: @escaping ((Bool) -> Void)) {
         manager.requestLocation()
         self.fetchLocationCompletionHandler = onCompletion
@@ -78,12 +78,12 @@ final class LocationManager: NSObject, LocationManagerType, CLLocationManagerDel
         if visit.departureDate != Date.distantFuture {
             date = visit.departureDate
             context = .visitExit
-            
+
             startMonitoringVisitRegion(with: visit.coordinate, maxRadius: visit.horizontalAccuracy)
         } else if visit.arrivalDate != Date.distantPast {
             date = visit.arrivalDate
             context = .visitEntry
-            
+
             stopMonitoringVisitRegion()
         }
 
@@ -105,26 +105,26 @@ final class LocationManager: NSObject, LocationManagerType, CLLocationManagerDel
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         for request in requests {
-            request(locations.map({return (location: $0, context: OpenLocateLocation.Context.background_fetch)}))
+            request(locations.map({return (location: $0, context: OpenLocateLocation.Context.backgroundFetch)}))
         }
         if let fetchLocationCompletionHandler = self.fetchLocationCompletionHandler {
             fetchLocationCompletionHandler(true)
             self.fetchLocationCompletionHandler = nil
         }
     }
-    
+
     func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
         if let location = manager.location {
             for request in requests {
-                request([(location: location, context: OpenLocateLocation.Context.geofence_entry)])
+                request([(location: location, context: OpenLocateLocation.Context.geofenceEntry)])
             }
         }
     }
-    
+
     func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
         if let location = manager.location {
             for request in requests {
-                request([(location: location, context: OpenLocateLocation.Context.geofence_exit)])
+                request([(location: location, context: OpenLocateLocation.Context.geofenceExit)])
             }
             startMonitoringVisitRegion(with: location.coordinate, maxRadius: location.horizontalAccuracy)
         }
@@ -132,7 +132,7 @@ final class LocationManager: NSObject, LocationManagerType, CLLocationManagerDel
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         debugPrint(error)
-        
+
         if let fetchLocationCompletionHandler = self.fetchLocationCompletionHandler {
             fetchLocationCompletionHandler(false)
             self.fetchLocationCompletionHandler = nil
@@ -166,14 +166,14 @@ final class LocationManager: NSObject, LocationManagerType, CLLocationManagerDel
     }
 
     // MARK: Private
-    
+
     private func startMonitoringVisitRegion(with coordinate: CLLocationCoordinate2D, maxRadius: CLLocationDistance) {
         let region = CLCircularRegion(center: coordinate,
                                       radius: max(LocationManager.minimumVisitRegionRadius, maxRadius),
                                       identifier: LocationManager.visitRegionIdentifier)
         manager.startMonitoring(for: region)
     }
-    
+
     private func stopMonitoringVisitRegion() {
         let regions = manager.monitoredRegions.filter({ $0.identifier == LocationManager.visitRegionIdentifier })
         regions.forEach { manager.stopMonitoring(for: $0) }

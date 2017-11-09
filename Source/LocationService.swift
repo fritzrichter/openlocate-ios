@@ -32,7 +32,7 @@ protocol LocationServiceType {
 
     func start()
     func stop()
-    
+
     func fetchLocation(onCompletion: @escaping ((Bool) -> Void))
 }
 
@@ -111,7 +111,7 @@ final class LocationService: LocationServiceType {
                 strongSelf.postAllLocationsIfNeeded()
             }
         }
-        
+
         UserDefaults.standard.set(true, forKey: isStartedKey)
         UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalMinimum)
     }
@@ -119,15 +119,15 @@ final class LocationService: LocationServiceType {
     func stop() {
         locationManager.cancel()
         postAllLocations()
-        
+
         UserDefaults.standard.set(false, forKey: isStartedKey)
         UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalNever)
     }
-    
+
     func fetchLocation(onCompletion: @escaping ((Bool) -> Void)) {
         locationManager.fetchLocation(onCompletion: onCompletion)
     }
-    
+
 }
 
 extension LocationService {

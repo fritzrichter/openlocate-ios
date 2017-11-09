@@ -27,6 +27,12 @@ import CoreLocation
 @testable import OpenLocate
 
 class MockCLLocationManager: CLLocationManagerType {
+    var desiredAccuracy: CLLocationAccuracy = kCLLocationAccuracyHundredMeters
+
+    var monitoredRegions: Set<CLRegion> {
+        return Set([CLRegion]())
+    }
+
     weak var delegate: CLLocationManagerDelegate?
 
     var location: CLLocation?
@@ -56,6 +62,12 @@ class MockCLLocationManager: CLLocationManagerType {
     func requestWhenInUseAuthorization() {}
 
     func stopUpdatingLocation() {}
+
+    func requestLocation() {}
+
+    func startMonitoring(for region: CLRegion) {}
+
+    func stopMonitoring(for region: CLRegion) {}
 }
 
 class LocationManagerTests: BaseTestCase {
